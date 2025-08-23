@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import COVER_IMAGE from "../assets/Imagen_Login.png";
 import "./LoginForm.css";
 
-function Login() {
-  const navigate = useNavigate();
-
+function Login({ onLogin }) {
   const [user, setUser] = useState("");
-  const [pass, setPass] = useState(""); // 👈 unifiqué con "pass" porque abajo lo usas así
+  const [pass, setPass] = useState("");
   const [error, setError] = useState("");
   const [msg, setMsg] = useState("");
-
-  useEffect(() => {}, [msg, navigate]);
 
   const handleInputLogin = (e, type) => {
     const value = e.target.value;
@@ -25,7 +20,7 @@ function Login() {
   };
 
   const loginSubmit = (e) => {
-    e.preventDefault(); // 👈 evita que el form recargue la página
+    e.preventDefault();
 
     if (user === "" || pass === "") {
       setError("Por favor complete todos los campos");
@@ -46,12 +41,11 @@ function Login() {
     })
       .then((response) => response.json())
       .then((response) => {
-        if (response[0].result !== "Login exitoso") {
-          setError(response[0].result);
+        if (response.result !== "Login exitoso") {
+          setError(response.message);
         } else {
-          setMsg(response[0].result);
-          localStorage.setItem("login", "true");
-          setTimeout(() => navigate("/app"), 2000);
+          setMsg(response.result);
+          onLogin(response.user);
         }
       })
       .catch((err) => {

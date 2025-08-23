@@ -35,12 +35,15 @@ export const Header = ({ user }) => {
         {/* Bloque derecho dinámico */}
         <div className="user-section">
           {/* Saldo */}
+          <button className="balance-button">
+            
           <div className="user-balance">
             <span>
               {user.balance.toLocaleString("es-CO")}
             </span>
-            <span className="currency-symbol">฿</span>
+            <span className="currency-symbol">$</span>
           </div>
+          </button>
 
           {/* Carrito */}
           <button className="cart-button">
@@ -48,11 +51,13 @@ export const Header = ({ user }) => {
           </button>
 
           {/* Avatar */}
-          <img
-            src={user.avatarUrl}
-            alt={user.name}
-            className="user-avatar"
-          />
+          <button className="avatar-button">
+            <img
+              src={user.avatarUrl}
+              alt={user.name}
+              className="user-avatar"
+            />
+          </button>
         </div>
       </div>
     </header>

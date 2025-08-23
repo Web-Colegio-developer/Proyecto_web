@@ -5,7 +5,7 @@ import './LoginForm.css';
 const LoginForm = ({ onLogin }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
-    // For now, we'll simulate a successful login with dummy data
+    // simulamos un inicio de sesión exitoso
     const userData = {
       balance: 200,
       avatarUrl: 'https://unavatar.io/midudev',

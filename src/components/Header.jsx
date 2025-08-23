@@ -1,27 +1,48 @@
+import { useState, useEffect, useRef } from "react";
 import { ShoppingCart } from "lucide-react";
 import './Header.css';
 
-export const Header = ({ user }) => {
+export const Header = ({ user, onLogout }) => {
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const menuRef = useRef(null);
+
+  const toggleMenu = () => {
+    setIsMenuVisible(!isMenuVisible);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <header className="main-header">
       <div className="header-container">
         
         {/* Logo como imagen */}
         <div className="logo">
-          <a href="/">
+          <div>
             <img
               src="/logo.webp"
               alt="Logo"
               className="logo-img"
             />
-          </a>
+          </div>
         </div>
 
         {/* Navegación centrada */}
         <nav className="header-nav">
           <ul>
             <li>
-              <a href="/">Inicio</a>
+              <a href="#">Inicio</a>
             </li>
             <li>
               <a href="/about">Sobre nosotros</a> 
@@ -51,13 +72,22 @@ export const Header = ({ user }) => {
           </button>
 
           {/* Avatar */}
-          <button className="avatar-button">
-            <img
-              src={user.avatarUrl}
-              alt={user.name}
-              className="user-avatar"
-            />
-          </button>
+          <div className="avatar-container" ref={menuRef}>
+            <button className="avatar-button" onClick={toggleMenu}>
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="user-avatar"
+              />
+            </button>
+            {isMenuVisible && (
+              <div className="logout-menu">
+                <button onClick={onLogout} className="logout-button">
+                  Cerrar Sesión
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

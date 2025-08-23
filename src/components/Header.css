@@ -152,3 +152,42 @@
   opacity: 0.8;
   transform: scale(1.1);
 }
+
+.logout-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+}
+
+.logout-button:hover {
+  transform: scale(1.1);
+  color: #f59e0b; /* amber-400 */
+}
+
+.avatar-container {
+  position: relative;
+}
+
+.logout-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0.5rem;
+  z-index: 10;
+}
+
+.logout-menu .logout-button {
+  color: #374151; /* gray-700 */
+  font-size: 1rem; /* 16px */
+}
+
+.logout-menu .logout-button:hover {
+  color: #1f2937; /* gray-800 */
+}

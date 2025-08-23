@@ -1,18 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
-import LoginForm from './components/LoginForm'
-import { Header } from './components/Header'
+import { useState } from 'react';
+import './App.css';
+import LoginForm from './components/LoginForm';
+import { Header } from './components/Header';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
 
   return (
     <>
-    <Header user={{ balance: 100, avatarUrl: reactLogo, name: 'Usuario' }} />
-    <LoginForm />
+      {user ? (
+        <Header user={user} />
+      ) : (
+        <LoginForm onLogin={handleLogin} />
+      )}
     </>
-  )
+  );
 }
 
-export default App
+export default App;

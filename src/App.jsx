@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import LoginForm from './components/LoginForm';
+import Registro from './components/Registro';
 import { Header } from './components/Header';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
     const loggedInUser = localStorage.getItem("user");
@@ -29,7 +31,11 @@ function App() {
       {user ? (
         <Header user={user} onLogout={handleLogout} />
       ) : (
-        <LoginForm onLogin={handleLogin} />
+        showRegister ? (
+          <Registro onRegister={handleLogin} onSwitchToLogin={() => setShowRegister(false)} />
+        ) : (
+          <LoginForm onLogin={handleLogin} onSwitchToRegister={() => setShowRegister(true)} />
+        )
       )}
     </>
   );

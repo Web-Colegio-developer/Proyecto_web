@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import COVER_IMAGE from "../assets/Imagen_Login.png";
 import "./LoginForm.css";
+import { Link } from "react-router-dom";
+
 
 function Login({ onLogin }) {
   const [user, setUser] = useState("");
@@ -95,7 +97,7 @@ function Login({ onLogin }) {
 
           <div className="register-link">
             <p>
-              ¿No tienes Cuenta? <a href="#">Regístrate</a>
+              No tienes Cuenta? <Link to="/register">Regístrate</Link>
             </p>
           </div>
         </form>

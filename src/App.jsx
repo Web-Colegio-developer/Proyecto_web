@@ -10,7 +10,7 @@ function App() {
   return (
     <>
     <Header user={{ balance: 100, avatarUrl: reactLogo, name: 'Usuario' }} />
-    {/*<LoginForm />*/}
+    <LoginForm />
     </>
   )
 }

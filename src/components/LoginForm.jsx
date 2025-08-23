@@ -1,11 +1,12 @@
 import React from "react";
 import COVER_IMAGE from '../assets/Imagen_Login.png';
+import './LoginForm.css';
 
 const LoginForm = () => {
   return (
     <div className="login">
-        <div className="relative w-1/2 h-full flex flex-col">
-            <img src={COVER_IMAGE} className="w-full h-full object-cover" />
+        <div className="Contenedor_Imagen">
+            <img src={COVER_IMAGE} className="Imagen" />
         <form action="">
             <h1>Inicio Sesion</h1>
             <div className="input-box">

@@ -23,5 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# Custom
-/backend/db_connection.php
+# Environment variables
+backend/.env

@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Menu, X } from "lucide-react";
 import './Header.css';
 
 export const Header = ({ user, onLogout }) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   useEffect(() => {
@@ -53,8 +58,8 @@ export const Header = ({ user, onLogout }) => {
           </ul>
         </nav>
 
-        {/* Bloque derecho dinámico */}
-        <div className="user-section">
+        {/* Bloque derecho dinámico (Escritorio) */}
+        <div className="user-section desktop">
           {/* Saldo */}
           <button className="balance-button">
             
@@ -89,7 +94,63 @@ export const Header = ({ user, onLogout }) => {
             )}
           </div>
         </div>
+
+        {/* Botón de menú móvil */}
+        <div className="mobile-menu-button">
+          <button onClick={toggleMobileMenu} className="mobile-menu-toggle">
+            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </div>
+
+      {/* Navegación móvil */}
+      {isMobileMenuOpen && (
+        <nav className="mobile-nav">
+          <ul>
+            <li>
+              <a href="#">Inicio</a>
+            </li>
+            <li>
+              <a href="/about">Sobre nosotros</a> 
+            </li>
+            <li>
+              <a href="/contact">Contacto</a>
+            </li>
+          </ul>
+          {/* Bloque derecho dinámico (Móvil) */}
+          <div className="user-section mobile">
+            {/* Perfil */}
+            <button className="avatar-container">
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  className="user-avatar"
+                />
+              <span>{user.name}</span>
+            </button>
+
+            {/* Saldo */}
+            <button className="balance-button">
+              <div className="user-balance">
+                <span>Saldo</span>
+                <span>
+                  {user.balance.toLocaleString("es-CO")}$
+                </span>
+              </div>
+            </button>
+
+            {/* Carrito */}
+            <button className="cart-button">
+              <ShoppingCart size={20} />
+              <span>Carrito</span>
+            </button>
+
+            <button onClick={onLogout} className="logout-button">
+              Cerrar Sesión
+            </button>
+          </div>
+        </nav>
+      )}
     </header>
   );
 };

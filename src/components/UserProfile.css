@@ -1,7 +1,7 @@
 /* Estilos para el componente UserProfile */
 .user-profile-container {
-  background-color: #f9fafb; /* gray-50 */
-  padding: 2rem;
+  background-color: white; /* gray-50 */
+  padding: 1rem; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,9 +10,9 @@
 
 .user-profile-card {
   background-color: white;
-  border-radius: 1.5rem; /* 24px */
+  border-radius: 4.5rem; /* 24px */
   border-color: #000000;
-  border-width: 1px;
+  border-width: 3px;
   border-style: solid;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   overflow: hidden;
@@ -20,7 +20,7 @@
 
 .profile-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+  border-bottom: 1px solid #ffffff00; /* gray-200 */
   text-align: center;
 }
 
@@ -89,10 +89,10 @@
 }
 
 .avatar-image-wrapper {
-  width: 12rem; /* 192px */
-  height: 12rem; /* 192px */
+  width: 16rem; /* 192px */
+  height: 16rem; /* 192px */
   border-radius: 9999px;
-  /* border: 8px solid #000000; black */
+  border: 8px solid #9b4a08;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -139,14 +139,14 @@
 }
 
 .profile-actions .bg-orange-700 {
-  background-color: #c2410c; /* orange-700 */
+  background-color: #9b4a08; /* new color */
   color: white;
-  border: 1px solid #c2410c;
+  border: 1px solid #9b4a08;
 }
 
 .profile-actions .bg-orange-700:hover {
-  background-color: #9a3412; /* orange-800 */
-  border-color: #9a3412;
+  background-color: #7c3d07; /* darker shade for hover */
+  border-color: #7c3d07;
 }
 
 .profile-actions .border-orange-700 {

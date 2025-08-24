@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './UserProfile.css';
+import logo from '/public/logo.webp';
 
 export default function PerfilUsuario({ user }) {
   const [formData, setFormData] = useState(null);
@@ -53,7 +56,15 @@ export default function PerfilUsuario({ user }) {
 
     const dataToSave = { ...editedData };
 
-    // Formatear la fecha de nacimiento a YYYY-MM-DD
+    // Validación de campos vacíos
+    const requiredFields = ['nombres', 'apellidos', 'fecha_nacimiento', 'direccion', 'telefono', 'genero', 'correo_electronico'];
+    for (const field of requiredFields) {
+      if (!dataToSave[field] || String(dataToSave[field]).trim() === '') {
+        toast.error(`El campo '${field}' no puede estar en blanco.`);
+        return;
+      }
+    }
+
     if (dataToSave.fecha_nacimiento) {
       const date = new Date(dataToSave.fecha_nacimiento);
       dataToSave.fecha_nacimiento = date.toISOString().split('T')[0];
@@ -75,12 +86,13 @@ export default function PerfilUsuario({ user }) {
       const result = await response.json();
       if (result.success) {
         setFormData(editedData);
-        alert("Perfil actualizado con éxito!");
+        toast.success("Perfil actualizado con éxito!");
       } else {
         throw new Error(result.message);
       }
     } catch (err) {
       setError(err.message);
+      toast.error(`Error: ${err.message}`);
     }
   };
 
@@ -109,14 +121,13 @@ export default function PerfilUsuario({ user }) {
         </div>
         <div className="profile-content">
           {/* Columna Izquierda (Perfil) */}
-          <div className="w-full md:w-1/2 user-profile-card">
+          <div className="flex-grow flex-shrink-0 md:w-2/5 user-profile-card">
             <div className="profile-avatar-section">
-              <h3 className="profile-name">{editedData.nombres}</h3>
-              <p className="profile-name">{editedData.apellidos}</p>
+              <h3 className="profile-name">{editedData.nombres} {editedData.apellidos}</h3>
               <p className="profile-role">{editedData.rol}</p>
               <div className="avatar-image-wrapper">
                 <img
-                  src={editedData.foto || "https://cdn.discordapp.com/avatars/509455254249668662/e595055767f4375dc5bb9790c1ba9f98"}
+                  src={editedData.foto || logo}
                   alt="avatar"
                   className="avatar-image"
                 />
@@ -125,7 +136,7 @@ export default function PerfilUsuario({ user }) {
           </div>
 
           {/* Columna Derecha (Bio & Detalles) */}
-          <div className="w-full md:w-1/2 user-profile-card">
+          <div className="flex-grow flex-shrink-0 md:w-3/5 user-profile-card">
             <div className="profile-header">
               <h3 className="text-xl font-bold">Bio & Detalles</h3>
             </div>
@@ -177,6 +188,7 @@ export default function PerfilUsuario({ user }) {
           </div>
         </div>
       </div>
+    <ToastContainer />
     </div>
   );
 }

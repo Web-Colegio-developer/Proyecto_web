@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './UserProfile.css';
-import logo from '/public/logo.webp';
+
 
 export default function PerfilUsuario({ user }) {
   const [formData, setFormData] = useState(null);
@@ -129,7 +129,7 @@ export default function PerfilUsuario({ user }) {
               <p className="profile-role">{editedData.rol}</p>
               <div className="avatar-image-wrapper">
                 <img
-                  src={editedData.foto || logo}
+                  src={editedData.foto || '/logo.webp'}
                   alt="avatar"
                   className="avatar-image"
                 />

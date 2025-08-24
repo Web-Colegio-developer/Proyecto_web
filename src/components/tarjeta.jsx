@@ -1,6 +1,6 @@
 import "./tarjeta.css";
-import logo from "/public/logo.webp";
-import chip from "/public/chip.png";
+
+
 import { ArrowDownCircle, ArrowUpCircle, Repeat, PlusCircle, Bell } from "lucide-react";
 
 const Tarjeta = ({ user, open, onClose }) => {
@@ -29,7 +29,7 @@ const Tarjeta = ({ user, open, onClose }) => {
           {/* Encabezado */}
           <div className="tarjeta-header">
             <div className="tarjeta-icon">
-              <img src={logo} alt="Moneda" className="icono-moneda" />
+              <img src="/logo.webp" alt="Moneda" className="icono-moneda" />
             </div>
             <Bell className="tarjeta-bell" size={20} />
           </div>
@@ -41,7 +41,7 @@ const Tarjeta = ({ user, open, onClose }) => {
           </div>
 
           {/* Chip de tarjeta */}
-          <div className="tarjeta-chip"><img src={chip} alt="Chip" className="chip-img" /></div>
+          <div className="tarjeta-chip"><img src="/chip.png" alt="Chip" className="chip-img" /></div>
 
           {/* Botones */}
           <div className="tarjeta-actions">

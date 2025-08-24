@@ -161,7 +161,7 @@ app.post("/register", upload.single("foto"), async (req, res) => {
       return res.status(400).json({ success: false, message: "Faltan campos obligatorios" });
     }
 
-    const foto = req.file ? req.file.filename : null;
+    const foto = req.file ? path.join('backend', 'uploads', req.file.filename) : null;
     const rolUsuario = rol?.trim() || "estudiante";
 
     await pool.query(

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import './Header.css';
+import "./Header.css";
 
-export const Header = ({ user, onLogout }) => {
+export const Header = ({ user, onLogout, onBalanceClick }) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -32,15 +32,10 @@ export const Header = ({ user, onLogout }) => {
   return (
     <header className="main-header">
       <div className="header-container">
-        
         {/* Logo como imagen */}
         <div className="logo">
           <div>
-            <img
-              src="/logo.webp"
-              alt="Logo"
-              className="logo-img"
-            />
+            <img src="/logo.webp" alt="Logo" className="logo-img" />
           </div>
         </div>
 
@@ -51,7 +46,7 @@ export const Header = ({ user, onLogout }) => {
               <a href="#">Inicio</a>
             </li>
             <li>
-              <a href="/about">Sobre nosotros</a> 
+              <a href="/about">Sobre nosotros</a>
             </li>
             <li>
               <a href="/contact">Contacto</a>
@@ -62,14 +57,11 @@ export const Header = ({ user, onLogout }) => {
         {/* Bloque derecho dinámico (Escritorio) */}
         <div className="user-section desktop">
           {/* Saldo */}
-          <button className="balance-button">
-            
-          <div className="user-balance">
-            <span>
-              {user.balance.toLocaleString("es-CO")}
-            </span>
-            <span className="currency-symbol">$</span>
-          </div>
+          <button className="balance-button" onClick={onBalanceClick}>
+            <div className="user-balance">
+              <span>{user.balance.toLocaleString("es-CO")}</span>
+              <span className="currency-symbol">$</span>
+            </div>
           </button>
 
           {/* Carrito */}
@@ -115,7 +107,7 @@ export const Header = ({ user, onLogout }) => {
               <a href="#">Inicio</a>
             </li>
             <li>
-              <a href="/about">Sobre nosotros</a> 
+              <a href="/about">Sobre nosotros</a>
             </li>
             <li>
               <a href="/contact">Contacto</a>
@@ -125,21 +117,19 @@ export const Header = ({ user, onLogout }) => {
           <div className="user-section mobile">
             {/* Perfil */}
             <Link to="/profile" className="avatar-container">
-                <img
-                  src={user.avatarUrl}
-                  alt={user.name}
-                  className="user-avatar"
-                />
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="user-avatar"
+              />
               <span>{user.name}</span>
             </Link>
 
             {/* Saldo */}
-            <button className="balance-button">
+            <button className="balance-button" onClick={onBalanceClick}>
               <div className="user-balance">
                 <span>Saldo</span>
-                <span>
-                  {user.balance.toLocaleString("es-CO")}$
-                </span>
+                <span>{user.balance.toLocaleString("es-CO")}$</span>
               </div>
             </button>
 

@@ -3,12 +3,14 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
 import LoginForm from './components/LoginForm';
 import Registro from './components/Registro';
-import { Header } from './components/Header';
+import Header from './components/Header'; 
 import UserProfile from './components/UserProfile';
+import Tarjeta from './components/tarjeta'; // 👈 Importa la tarjeta
 
 function App() {
   const [user, setUser] = useState(null);
   const [showRegister, setShowRegister] = useState(false);
+  const [mostrarTarjeta, setMostrarTarjeta] = useState(false); // 👈 Estado para la tarjeta
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,9 +21,9 @@ function App() {
     } else {
       navigate('/login');
     }
-  }, []);
+  }, [navigate]);
 
-  // New useEffect for polling user balance
+  // 👉 Refrescar datos del usuario (saldo, nombre, foto) desde backend
   useEffect(() => {
     let intervalId;
 
@@ -32,44 +34,40 @@ function App() {
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.data) {
-              // Update only the balance, or relevant user data
               setUser(prevUser => ({
                 ...prevUser,
                 balance: data.data.saldo,
-                // Update other fields if necessary, e.g., name, avatarUrl
                 name: `${data.data.nombres} ${data.data.apellidos}`,
                 avatarUrl: data.data.foto,
               }));
             }
           } else {
-            console.error("Failed to fetch user profile:", response.statusText);
+            console.error("Error al obtener perfil:", response.statusText);
           }
         } catch (error) {
-          console.error("Error fetching user profile:", error);
+          console.error("Error al conectar al servidor:", error);
         }
       }
     };
 
     if (user) {
-      // Fetch immediately on login/app load if user exists
       fetchUserBalance();
-      // Set up polling every 15 seconds
       intervalId = setInterval(fetchUserBalance, 15000); 
     }
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalId) clearInterval(intervalId);
     };
-  }, [user]); // Re-run effect if user object changes (e.g., on login/logout)
+  }, [user]);
 
+  // 👉 Manejo de login
   const handleLogin = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
     navigate('/');
   };
 
+  // 👉 Manejo de logout
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
@@ -88,7 +86,13 @@ function App() {
 
   return (
     <>
-      {user && <Header user={user} onLogout={handleLogout} />}
+      {user && (
+        <Header 
+          user={user} 
+          onLogout={handleLogout} 
+          onBalanceClick={() => setMostrarTarjeta(true)} // 👉 Click en saldo muestra tarjeta
+        />
+      )}
       <Routes>
         {user ? (
           <>
@@ -104,6 +108,13 @@ function App() {
           </>
         )}
       </Routes>
+
+      {/* 👇 Modal de la tarjeta */}
+      <Tarjeta 
+        user={user} 
+        open={mostrarTarjeta} 
+        onClose={() => setMostrarTarjeta(false)} 
+      />
     </>
   );
 }

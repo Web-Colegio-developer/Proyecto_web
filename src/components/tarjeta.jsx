@@ -1,4 +1,5 @@
 import "./tarjeta.css";
+import logo from "/public/logo.webp";
 import { ArrowDownCircle, ArrowUpCircle, Repeat, PlusCircle, Bell } from "lucide-react";
 
 const Tarjeta = ({ user, open, onClose }) => {
@@ -27,7 +28,7 @@ const Tarjeta = ({ user, open, onClose }) => {
           {/* Encabezado */}
           <div className="tarjeta-header">
             <div className="tarjeta-icon">
-              <img src="/bitcoin.png" alt="Moneda" className="icono-moneda" />
+              <img src={logo} alt="Moneda" className="icono-moneda" />
             </div>
             <Bell className="tarjeta-bell" size={20} />
           </div>

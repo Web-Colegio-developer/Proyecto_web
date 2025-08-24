@@ -86,8 +86,11 @@ app.put('/profile/:email', async (req, res) => {
   const { email } = req.params;
   const userData = req.body;
 
-  // Evitar que se actualice el correo electrónico
+    // Evitar que se actualice el correo electrónico
   delete userData.correo_electronico;
+
+  // Evitar que se actualice el saldo
+  delete userData.saldo;
 
   // Si la contraseña está vacía, no la actualices
   if (userData.passwords === '' || userData.passwords === undefined) {
@@ -107,13 +110,13 @@ app.put('/profile/:email', async (req, res) => {
         // Map frontend keys to database column names if they differ
         let dbColumnName = key;
         switch (key) {
-          case 'nombre':
+          case 'nombres':
             dbColumnName = 'nombres';
             break;
-          case 'apellido':
+          case 'apellidos':
             dbColumnName = 'apellidos';
             break;
-          case 'email':
+          case 'correo_electronico':
             dbColumnName = 'correo_electronico';
             break;
           case 'telefono':
@@ -122,19 +125,19 @@ app.put('/profile/:email', async (req, res) => {
           case 'direccion':
             dbColumnName = 'direccion';
             break;
-          case 'fechaNacimiento':
+          case 'fecha_nacimiento':
             dbColumnName = 'fecha_nacimiento';
             break;
-          case 'ciudad':
-            dbColumnName = 'lugar'; // Assuming 'lugar' is for city
+          case 'lugar': // Assuming 'lugar' is for city
+            dbColumnName = 'lugar';
             break;
-          case 'gender':
+          case 'genero':
             dbColumnName = 'genero';
             break;
-          case 'password':
+          case 'passwords':
             dbColumnName = 'passwords';
             break;
-          case 'avatarUrl':
+          case 'foto':
             dbColumnName = 'foto';
             break;
           case 'rol':
@@ -169,6 +172,7 @@ app.put('/profile/:email', async (req, res) => {
     }
   } catch (error) {
     console.error('Error al actualizar el perfil:', error);
+    console.log(error);
     res.status(500).json({ message: 'Error en la conexión al servidor' });
   }
 });

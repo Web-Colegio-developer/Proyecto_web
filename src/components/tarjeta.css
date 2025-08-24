@@ -69,11 +69,18 @@
 .tarjeta-chip {
   width: 55px;
   height: 40px;
-  background: #d4a353;
+  /* background: #d4a353; */ /* Removed as image will provide visual */
   border-radius: 6px;
   position: absolute;
   right: 18px;
   top: 70px;
+}
+
+.tarjeta-chip img {
+  width: 100%;
+  height: 100%;
+  display: block; /* Remove extra space below image */
+  border-radius: 6px; /* Inherit border-radius from parent */
 }
 
 /* Botones */
@@ -112,9 +119,9 @@
 /* Botón cerrar */
 .tarjeta-cerrar {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #e74c3c;
+  top: 22px;
+  right: 14px;
+  background: #8f4f1b;
   color: white;
   border: none;
   border-radius: 50%;
@@ -128,7 +135,7 @@
 }
 
 .tarjeta-cerrar:hover {
-  background: #c0392b;
+  background: #af5f1d;
 }
 
 @keyframes fadeIn {

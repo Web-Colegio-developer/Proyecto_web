@@ -67,7 +67,7 @@ app.get('/profile/:email', async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM usuarios WHERE correo_electronico = ?',
+      'SELECT u.*, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ?',
       [email]
     );
 

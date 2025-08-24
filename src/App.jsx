@@ -21,6 +21,49 @@ function App() {
     }
   }, []);
 
+  // New useEffect for polling user balance
+  useEffect(() => {
+    let intervalId;
+
+    const fetchUserBalance = async () => {
+      if (user && user.email) {
+        try {
+          const response = await fetch(`http://localhost:3001/profile/${user.email}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data) {
+              // Update only the balance, or relevant user data
+              setUser(prevUser => ({
+                ...prevUser,
+                balance: data.data.saldo,
+                // Update other fields if necessary, e.g., name, avatarUrl
+                name: `${data.data.nombres} ${data.data.apellidos}`,
+                avatarUrl: data.data.foto,
+              }));
+            }
+          } else {
+            console.error("Failed to fetch user profile:", response.statusText);
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
+    };
+
+    if (user) {
+      // Fetch immediately on login/app load if user exists
+      fetchUserBalance();
+      // Set up polling every 15 seconds
+      intervalId = setInterval(fetchUserBalance, 15000); 
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [user]); // Re-run effect if user object changes (e.g., on login/logout)
+
   const handleLogin = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);

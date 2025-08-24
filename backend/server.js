@@ -2,6 +2,10 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import pool from './db.js';
+import multer from 'multer';
+import path from "path";
+
+
 
 const app = express();
 const port = 3001;
@@ -114,3 +118,75 @@ app.put('/profile/:email', async (req, res) => {
 app.listen(port, () => {
   console.log(`El servidor se está ejecutando en http://localhost:${port}`);
 });
+
+
+// Configuración de almacenamiento
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(process.cwd(), "uploads")); // 👈 más fácil
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
+export default upload;
+
+
+
+
+
+app.post("/register", upload.single("foto"), async (req, res) => {
+  try {
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    // Desestructuramos usando los nombres reales del frontend
+    const { nombre, apellido, email, telefono, direccion, fechaNacimiento, ciudad, gender, password, rol } = req.body;
+
+    // Validación segura
+    if (
+      !nombre?.trim() ||
+      !apellido?.trim() ||
+      !email?.trim() ||
+      !telefono?.trim() ||
+      !direccion?.trim() ||
+      !fechaNacimiento?.trim() ||
+      !ciudad?.trim() ||
+      !gender?.trim() ||
+      !password?.trim()
+    ) {
+      return res.status(400).json({ success: false, message: "Faltan campos obligatorios" });
+    }
+
+    const foto = req.file ? req.file.filename : null;
+    const rolUsuario = rol?.trim() || "estudiante";
+
+    await pool.query(
+      `INSERT INTO usuarios 
+       (nombres, apellidos, correo_electronico, telefono, direccion, fecha_nacimiento, lugar, genero, passwords, foto, rol) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        nombre.trim(),
+        apellido.trim(),
+        email.trim(),
+        telefono.trim(),
+        direccion.trim(),
+        fechaNacimiento.trim(),
+        ciudad.trim(),
+        gender.trim(),
+        password.trim(),
+        foto,
+        rolUsuario
+      ]
+    );
+
+    res.json({ success: true, message: "Usuario registrado exitosamente" });
+  } catch (error) {
+    console.error("Error en backend:", error);
+    res.status(500).json({ success: false, message: "Error en la conexión al servidor" });
+  }
+});
+

@@ -49,7 +49,7 @@ function App() {
       <Routes>
         {user ? (
           <>
-            <Route path="/" element={<div><h1>Welcome</h1></div>} />
+            <Route path="/" element={<div><h1>AQUI METEMOS LOS PRODUCTOS</h1></div>} />
             <Route path="/profile" element={<UserProfile user={user} />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>

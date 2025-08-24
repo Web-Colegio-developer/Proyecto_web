@@ -1,7 +1,7 @@
-
 import React, { useState } from "react";
 import COVER_IMAGE from "../assets/Imagen_Login.png";
 import "./Registro.css";
+import { Link } from "react-router-dom";
 
 const REGISTRO = () => {
   const [preview, setPreview] = useState(null);
@@ -133,7 +133,7 @@ const REGISTRO = () => {
 
             {/* Link para iniciar sesión (full) */}
             <div className="reg-login-link reg-row--full">
-              <p>¿Ya tienes cuenta? <a href="#">Inicia Sesión</a></p>
+              <p>¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link></p>
             </div>
           </div>
         </form>

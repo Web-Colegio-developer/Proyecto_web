@@ -26,7 +26,9 @@ export default function PerfilUsuario({ user }) {
         const result = await response.json();
         if (result.success) {
           setFormData(result.data);
-          setEditedData(result.data);
+          if (!editedData) {
+            setEditedData(result.data);
+          }
         } else {
           throw new Error(result.message);
         }

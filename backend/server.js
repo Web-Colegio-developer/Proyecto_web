@@ -99,10 +99,68 @@ app.put('/profile/:email', async (req, res) => {
   }
 
   try {
-    const [result] = await pool.query(
-      'UPDATE usuarios SET ? WHERE correo_electronico = ?',
-      [userData, email]
-    );
+    const fields = [];
+    const values = [];
+
+    for (const key in userData) {
+      if (userData.hasOwnProperty(key)) {
+        // Map frontend keys to database column names if they differ
+        let dbColumnName = key;
+        switch (key) {
+          case 'nombre':
+            dbColumnName = 'nombres';
+            break;
+          case 'apellido':
+            dbColumnName = 'apellidos';
+            break;
+          case 'email':
+            dbColumnName = 'correo_electronico';
+            break;
+          case 'telefono':
+            dbColumnName = 'telefono';
+            break;
+          case 'direccion':
+            dbColumnName = 'direccion';
+            break;
+          case 'fechaNacimiento':
+            dbColumnName = 'fecha_nacimiento';
+            break;
+          case 'ciudad':
+            dbColumnName = 'lugar'; // Assuming 'lugar' is for city
+            break;
+          case 'gender':
+            dbColumnName = 'genero';
+            break;
+          case 'password':
+            dbColumnName = 'passwords';
+            break;
+          case 'avatarUrl':
+            dbColumnName = 'foto';
+            break;
+          case 'rol':
+            dbColumnName = 'rol';
+            break;
+          default:
+            // If the key is not explicitly mapped, assume it's a direct column name
+            break;
+        }
+
+        // Only add to update if the value is not empty or undefined
+        if (userData[key] !== '' && userData[key] !== undefined) {
+          fields.push(`${dbColumnName} = ?`);
+          values.push(userData[key]);
+        }
+      }
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ success: false, message: 'No hay datos para actualizar' });
+    }
+
+    const query = `UPDATE usuarios SET ${fields.join(', ')} WHERE correo_electronico = ?`;
+    values.push(email);
+
+    const [result] = await pool.query(query, values);
 
     if (result.affectedRows > 0) {
       res.json({ success: true, message: 'Perfil actualizado correctamente' });

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { ShoppingCart, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import './Header.css';
 
 export const Header = ({ user, onLogout }) => {
@@ -87,6 +88,9 @@ export const Header = ({ user, onLogout }) => {
             </button>
             {isMenuVisible && (
               <div className="logout-menu">
+                <Link to="/profile" className="profile-button">
+                  Perfil
+                </Link>
                 <button onClick={onLogout} className="logout-button">
                   Cerrar Sesión
                 </button>
@@ -120,14 +124,14 @@ export const Header = ({ user, onLogout }) => {
           {/* Bloque derecho dinámico (Móvil) */}
           <div className="user-section mobile">
             {/* Perfil */}
-            <button className="avatar-container">
+            <Link to="/profile" className="avatar-container">
                 <img
                   src={user.avatarUrl}
                   alt={user.name}
                   className="user-avatar"
                 />
               <span>{user.name}</span>
-            </button>
+            </Link>
 
             {/* Saldo */}
             <button className="balance-button">

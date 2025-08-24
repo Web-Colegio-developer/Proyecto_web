@@ -320,3 +320,27 @@
 .mobile-nav a:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+.logout-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-button {
+  background: none;
+  border: none;
+  color: #374151; /* gray-700 */
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  text-align: center;
+}
+
+.profile-button:hover {
+  background-color: #f3f4f6; /* gray-100 */
+  color: #1f2937; /* gray-800 */
+}

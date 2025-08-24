@@ -54,6 +54,63 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.get('/profile/:email', async (req, res) => {
+  const { email } = req.params;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Por favor, proporcione un correo electrónico' });
+  }
+
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM usuarios WHERE correo_electronico = ?',
+      [email]
+    );
+
+    if (rows.length > 0) {
+      res.json({ success: true, data: rows[0] });
+    } else {
+      res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al obtener el perfil:', error);
+    res.status(500).json({ message: 'Error en la conexión al servidor' });
+  }
+});
+
+app.put('/profile/:email', async (req, res) => {
+  const { email } = req.params;
+  const userData = req.body;
+
+  // Evitar que se actualice el correo electrónico
+  delete userData.correo_electronico;
+
+  // Si la contraseña está vacía, no la actualices
+  if (userData.passwords === '' || userData.passwords === undefined) {
+    delete userData.passwords;
+  }
+
+  if (!email) {
+    return res.status(400).json({ message: 'Por favor, proporcione un correo electrónico' });
+  }
+
+  try {
+    const [result] = await pool.query(
+      'UPDATE usuarios SET ? WHERE correo_electronico = ?',
+      [userData, email]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ success: true, message: 'Perfil actualizado correctamente' });
+    } else {
+      res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al actualizar el perfil:', error);
+    res.status(500).json({ message: 'Error en la conexión al servidor' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`El servidor se está ejecutando en http://localhost:${port}`);
 });

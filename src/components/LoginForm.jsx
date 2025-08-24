@@ -43,7 +43,7 @@ function Login({ onLogin }) {
     })
       .then((response) => response.json())
       .then((response) => {
-        if (response.result !== "Login exitoso") {
+        if (response.result !== "Loginn exitoso") {
           setError(response.message);
         } else {
           setMsg(response.result);

@@ -97,7 +97,7 @@ function Login({ onLogin }) {
 
           <div className="register-link">
             <p>
-              No tienes Cuenta? <Link to="/register">Regístrate</Link>
+              No tienes Cuenta? <Link to="/registro">Regístrate</Link>
             </p>
           </div>
         </form>

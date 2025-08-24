@@ -1,0 +1,149 @@
+
+
+/* Contenedor raíz del componente: ocupa todo y sin padding */
+.reg-root {
+  height: 100vh !important;
+  width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+}
+
+.reg-preview {
+  width: 64px;           /* ancho de la miniatura */
+  height: 64px;          /* alto de la miniatura */
+  object-fit: cover;     /* recorta en lugar de deformar */
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.85);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  display: inline-block;
+}
+
+/* Contenedor principal: FULLBLEED (ocupa toda la pantalla) */
+.reg-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: flex !important;
+  flex-direction: row !important;
+  background: transparent !important;
+  border-radius: 0 !important;      /* quita bordes para que llegue a los extremos */
+  overflow: hidden !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Imagen izquierda: ocupa la mitad exacta y 100% alto */
+.reg-image {
+  width: 50% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
+
+/* Form panel derecho: ocupa la otra mitad y 100% alto */
+.reg-form {
+  width: 50% !important;
+  height: 100% !important;
+  padding: 48px 60px !important;
+  background: var(--panel-pink) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+  position: relative !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* Mantener título centrado */
+.reg-title {
+  margin: 0 auto !important;
+  font-size: 30px !important;
+  font-weight: 800 !important;
+  color: var(--text) !important;
+}
+
+/* Grid de inputs (dos columnas) */
+.reg-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 14px 22px !important;
+  width: 100% !important;
+  align-items: start !important;
+}
+
+/* Campo que ocupa toda la fila */
+.reg-field--full { grid-column: 1 / -1 !important; }
+
+/* Inputs */
+.reg-field input[type="text"],
+.reg-field input[type="email"],
+.reg-field input[type="tel"],
+.reg-field input[type="date"],
+.reg-field input[type="password"],
+.reg-field input[type="file"],
+.reg-form input[type="text"],
+.reg-form input[type="email"],
+.reg-form input[type="tel"],
+.reg-form input[type="date"],
+.reg-form input[type="password"],
+.reg-form input[type="file"]{
+  width: 100% !important;
+  height: 44px !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(0,0,0,0.07) !important;
+  background: rgba(255,255,255,0.98) !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+}
+
+/* Botón Registrar: flotante y visible */
+.reg-form button[type="submit"].reg-btn--primary {
+  position: fixed !important;          /* fijado en viewport para que siempre se vea */
+  right: 28px !important;
+  bottom: 28px !important;
+  width: 84px !important;
+  height: 84px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  z-index: 9999 !important;
+  box-shadow: 0 20px 40px rgba(45,69,200,0.18) !important;
+  background: linear-gradient(180deg, var(--accent), var(--accent-dark)) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+/* Back botón a la izquierda (en flujo) */
+.reg-btn--secondary {
+  background: #efefef !important;
+  color: #222 !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+.reg-agree {
+  margin-top: 90px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Responsive: apilar en móviles */
+@media (max-width: 920px) {
+  .reg-container {
+    flex-direction: column !important;
+  }
+  .reg-image { width: 100% !important; height: 360px !important; }
+  .reg-form { width: 100% !important; height: auto !important; padding: 20px !important; }
+  .reg-form button[type="submit"].reg-btn--primary {
+    right: 18px !important;
+    bottom: 16px !important;
+    width: 64px !important;
+    height: 64px !important;
+  }
+}

@@ -72,6 +72,7 @@ function App() {
     localStorage.removeItem("user");
     setUser(null);
     navigate('/login');
+    window.location.reload(); // Force a full page reload
   };
 
   const handleSwitchToRegister = () => {

@@ -19,7 +19,10 @@ function App() {
       const foundUser = JSON.parse(loggedInUser);
       setUser(foundUser);
     } else {
-      navigate('/login');
+      // Solo redirigir a /login si no estás en /register
+      if (window.location.pathname !== "/register") {
+        navigate('/login');
+      }
     }
   }, [navigate]);
 

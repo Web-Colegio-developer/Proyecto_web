@@ -5,7 +5,7 @@ import logo from '../assets/Imagen_Login.png';
 import { SidebarData } from '../Data/Data';
 import { UilSignOutAlt } from '@iconscout/react-unicons';
 
-const Sliderbar = () => {
+const Sliderbar = ({ onLogout }) => {
 
         const [selected, setSelected] = React.useState(0);
 
@@ -34,7 +34,7 @@ const Sliderbar = () => {
                             </div>
                         );
                     })}
-                <div className="menu-item">
+                <div className="menu-item" onClick={onLogout}>
                     <UilSignOutAlt />
                 </div>
             </div>
@@ -43,4 +43,3 @@ const Sliderbar = () => {
 }
 
 export default Sliderbar;
-

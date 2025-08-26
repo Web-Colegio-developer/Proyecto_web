@@ -6,6 +6,7 @@ import Registro from './components/Registro';
 import Header from './components/Header'; 
 import UserProfile from './components/UserProfile';
 import Tarjeta from './components/tarjeta'; // 👈 Importa la tarjeta
+import Administrador from './components/Administrador';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -18,6 +19,9 @@ function App() {
     if (loggedInUser) {
       const foundUser = JSON.parse(loggedInUser);
       setUser(foundUser);
+      if (foundUser.role === 'administrador') {
+        navigate('/administrador');
+      }
     } else {
       // Solo redirigir a /login si no estás en /register
       if (window.location.pathname !== "/register") {
@@ -68,7 +72,11 @@ function App() {
   const handleLogin = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
-    navigate('/');
+    if (userData.role === 'administrador') {
+      navigate('/administrador');
+    } else {
+      navigate('/');
+    }
   };
 
   // 👉 Manejo de logout
@@ -91,7 +99,7 @@ function App() {
 
   return (
     <>
-      {user && (
+      {user && user.role !== 'administrador' && (
         <Header 
           user={user} 
           onLogout={handleLogout} 
@@ -101,9 +109,13 @@ function App() {
       <Routes>
         {user ? (
           <>
-            <Route path="/" element={<div><h1>AQUI METEMOS LOS PRODUCTOS</h1></div>} />
+            {user.role === 'administrador' ? (
+              <Route path="/administrador" element={<Administrador onLogout={handleLogout} />} />
+            ) : (
+              <Route path="/" element={<div><h1>AQUI METEMOS LOS PRODUCTOS</h1></div>} />
+            )}
             <Route path="/profile" element={<UserProfile user={user} />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to={user.role === 'administrador' ? '/administrador' : '/'} />} />
           </>
         ) : (
           <>

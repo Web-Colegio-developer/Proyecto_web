@@ -35,6 +35,7 @@ const Sliderbar = ({ onLogout, user }) => {
                     })}
                 <div className="menu-item" onClick={onLogout}>
                     <UilSignOutAlt />
+                    <span>Salir</span> 
                 </div>
             </div>
         </div>

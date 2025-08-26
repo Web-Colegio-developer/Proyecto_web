@@ -2,6 +2,8 @@ import { useState } from "react";
 import COVER_IMAGE from "../assets/Imagen_Login.png";
 import "./Registro.css";
 import { Link, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const REGISTRO = ({ onRegister }) => {
   const [preview, setPreview] = useState(null);
@@ -20,14 +22,12 @@ const REGISTRO = ({ onRegister }) => {
   // Opciones tipo chip
   const [gender, setGender] = useState("");
 
-  // Mensajes
-  const [error, setError] = useState("");
-  const [msg, setMsg] = useState("");
-
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    if (e.target.files.length > 0) {
+      const file = e.target.files[0];
       setPreview(URL.createObjectURL(file));
+    } else {
+      setPreview(null);
     }
   };
 
@@ -35,7 +35,12 @@ const REGISTRO = ({ onRegister }) => {
     e.preventDefault();
 
     if (!nombre || !apellido || !email || !telefono || !direccion || !fechaNacimiento || !ciudad || !password) {
-      setError("Por favor complete todos los campos.");
+      toast.error("Por favor complete todos los campos.");
+      return;
+    }
+
+    if (document.getElementById("foto").files.length === 0) {
+      toast.error("Por favor seleccione una foto de perfil.");
       return;
     }
 
@@ -51,9 +56,7 @@ const REGISTRO = ({ onRegister }) => {
     formData.append("gender", gender);
     formData.append("password", password);
     formData.append("rol", "estudiante"); // por default
-    if (document.getElementById("foto").files[0]) {
-      formData.append("foto", document.getElementById("foto").files[0]);
-    }
+    formData.append("foto", document.getElementById("foto").files[0]);
 
     fetch("http://localhost:3001/register", {
       method: "POST",
@@ -62,16 +65,16 @@ const REGISTRO = ({ onRegister }) => {
       .then((res) => res.json())
       .then((res) => {
         if (!res.success) {
-          setError(res.message);
+          toast.error(res.message);
         } else {
-          setMsg("¡Registro exitoso! Redirigiendo al login...");
+          toast.success("¡Registro exitoso! Redirigiendo al login...");
           setTimeout(() => {
             navigate("/login");
           }, 2000);
         }
       })
       .catch((err) => {
-        setError("Error en la conexión al servidor: " + err.message);
+        toast.error("Error en la conexión al servidor: " + err.message);
       });
   };
 
@@ -82,9 +85,6 @@ const REGISTRO = ({ onRegister }) => {
 
         <form className="reg-form" onSubmit={handleSubmit}>
           <h1 className="reg-title">Registro</h1>
-
-          {error && <p className="error">{error}</p>}
-          {msg && <p className="success">{msg}</p>}
 
           <div className="reg-grid">
             {/* Foto */}
@@ -163,6 +163,7 @@ const REGISTRO = ({ onRegister }) => {
           </div>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 };

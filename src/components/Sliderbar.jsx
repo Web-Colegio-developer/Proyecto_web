@@ -1,11 +1,10 @@
 import React from 'react';
 import './Sliderbar.css';
-import logo from '../assets/Imagen_Login.png';
 
 import { SidebarData } from '../Data/Data';
 import { UilSignOutAlt } from '@iconscout/react-unicons';
 
-const Sliderbar = ({ onLogout }) => {
+const Sliderbar = ({ onLogout, user }) => {
 
         const [selected, setSelected] = React.useState(0);
 
@@ -13,9 +12,9 @@ const Sliderbar = ({ onLogout }) => {
         <div className="sliderbar">
             {/*  Logo */}
             <div className="logo">
-                <img src={logo} alt=""/>
+                {user && <img src={user.avatarUrl} alt=""/>}
                 <span>  
-                    Adm<span>i</span>nistrador
+                    {user ? user.name : 'Administrador'}
                 </span>
             </div>
 

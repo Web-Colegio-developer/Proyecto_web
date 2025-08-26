@@ -110,7 +110,7 @@ function App() {
         {user ? (
           <>
             {user.role === 'administrador' ? (
-              <Route path="/administrador" element={<Administrador onLogout={handleLogout} />} />
+              <Route path="/administrador" element={<Administrador onLogout={handleLogout} user={user} />} />
             ) : (
               <Route path="/" element={<div><h1>AQUI METEMOS LOS PRODUCTOS</h1></div>} />
             )}

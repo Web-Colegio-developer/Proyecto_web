@@ -121,13 +121,15 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
           {/* Bloque derecho dinámico (Móvil) */}
           <div className="user-section mobile">
             {/* Perfil */}
-            <Link to="/profile" className="avatar-container">
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                className="user-avatar"
-              />
-              <span>{user.name}</span>
+            <Link to="/profile" className="avatar-container" style={{ textDecoration: 'none' }}>
+              <button className="avatar-button-mobile">
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  className="user-avatar"
+                />
+                <span>{user.name}</span>
+              </button>
             </Link>
 
             {user.role === "administrador" && (

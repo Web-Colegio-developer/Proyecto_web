@@ -1,13 +1,17 @@
 import "./Administrador.css";
-
+import Sliderbar from "./Sliderbar";
 
 
 const ADMINISTRADOR = () => {
   return (
-    <div className="administrador">
-      <h2>Panel de Administrador</h2>
-      <p>Bienvenido al panel de administración. Aquí puedes gestionar usuarios, revisar reportes y configurar el sistema.</p>
-      {/* Agrega más funcionalidades y componentes según sea necesario */}
+    <div className = "Administrador">
+        <div className="Administrador-glass">
+            <Sliderbar/>
+            <div></div>
+            <div></div>
+            <div></div>
+            
+        </div>
     </div>
   );
 }

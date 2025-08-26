@@ -1,0 +1,130 @@
+:root{
+  --bg: #fff;
+  --sidebar-bg: linear-gradient(180deg, #fff7f6 0%, #fff1f3 100%);
+  --activeItem: rgba(245, 183, 190, 0.7);
+  --orange: #ff9b2e;
+  --cofee: #d2691e;
+  --text: #222;
+}
+
+.sliderbar{
+    position: fixed;           
+    left: 1rem;
+    top: 1rem;
+    bottom: 1rem;
+    width: 260px;             
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;          
+    gap: 1.25rem;
+    background: var(--sidebar-bg);
+    border-radius: 1rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    transition: all 300ms ease;
+    z-index: 40;
+}
+
+
+.logo{
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text);
+    padding-left: 0.25rem;
+}
+
+.logo > img{
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* menú interior */
+.menu{
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.25rem;
+    gap: 0.5rem;
+    padding-right: 0.25rem;
+    flex: 1; 
+}
+
+
+.menu-item{
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    height: 48px;
+    padding: 0 0.9rem;
+    position: relative;
+    transition: background 200ms ease, transform 150ms ease;
+    font-size: 14px;
+    border-radius: 0.6rem;
+    width: calc(100% - 0.5rem); 
+    color: #333;
+}
+
+/* icono */
+.menu-item .icon{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+}
+
+
+.menu-item:hover{
+    cursor: pointer;
+    transform: translateX(3px);
+}
+
+
+.menu-item.active{
+    background-color: var(--activeItem);
+    margin-left: 0;
+}
+
+
+.menu-item.active::before{
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: 8px;
+    bottom: 8px;
+    width: 6px;
+    border-radius: 4px;
+    background: var(--orange);
+}
+
+
+.menu .menu-item--bottom{
+    margin-top: auto;
+    margin-bottom: 6px;
+    width: calc(100% - 0.5rem);
+}
+
+
+@media (max-width: 720px) {
+  .sliderbar{
+    left: 0.5rem;
+    width: 72px;
+    padding: 0.6rem;
+  }
+  .logo span { display: none; }
+  .menu-item { justify-content: center; width: 100%; padding: 0; }
+  .menu-item .label { display: none; }
+  .menu-item.active::before { left: 0; top: 8px; bottom: 8px; }
+}
+
+
+.main-content{
+  margin-left: 282px;
+  padding: 1.5rem;
+}
+
+    

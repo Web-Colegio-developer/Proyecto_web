@@ -37,7 +37,7 @@ app.post('/login', async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      'SELECT u.nombres, u.apellidos, u.correo_electronico, u.foto, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ? AND u.passwords = ?',
+      'SELECT u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ? AND u.passwords = ?',
       [user, pass]
     );
 
@@ -47,6 +47,7 @@ app.post('/login', async (req, res) => {
         email: rows[0].correo_electronico,
         avatarUrl: rows[0].foto,
         balance: rows[0].saldo,
+        role: rows[0].rol,
       };
       res.json({ result: 'Login exitoso', user: userData });
     } else {

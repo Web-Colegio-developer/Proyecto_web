@@ -83,6 +83,11 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
                 <Link to="/profile" className="profile-button">
                   Perfil
                 </Link>
+                {user.role === "administrador" && (
+                  <Link to="/admin" className="profile-button">
+                    Administrador
+                  </Link>
+                )}
                 <button onClick={onLogout} className="logout-button">
                   Cerrar Sesión
                 </button>
@@ -124,6 +129,12 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
               />
               <span>{user.name}</span>
             </Link>
+
+            {user.role === "administrador" && (
+              <Link to="/admin" className="avatar-container">
+                <span>Administrador</span>
+              </Link>
+            )}
 
             {/* Saldo */}
             <button className="balance-button" onClick={onBalanceClick}>

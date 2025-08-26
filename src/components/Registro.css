@@ -1,149 +1,191 @@
-
-
-/* Contenedor raíz del componente: ocupa todo y sin padding */
 .reg-root {
-  height: 100vh !important;
-  width: 100vw !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: block !important;
-  box-sizing: border-box !important;
-  background: transparent !important;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
 }
 
-.reg-preview {
-  width: 64px;           /* ancho de la miniatura */
-  height: 64px;          /* alto de la miniatura */
-  object-fit: cover;     /* recorta en lugar de deformar */
-  border-radius: 8px;
-  border: 2px solid rgba(255,255,255,0.85);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-  display: inline-block;
-}
-
-/* Contenedor principal: FULLBLEED (ocupa toda la pantalla) */
 .reg-container {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  display: flex !important;
-  flex-direction: row !important;
-  background: transparent !important;
-  border-radius: 0 !important;      /* quita bordes para que llegue a los extremos */
-  overflow: hidden !important;
-  box-shadow: none !important;
-  box-sizing: border-box !important;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
-/* Imagen izquierda: ocupa la mitad exacta y 100% alto */
 .reg-image {
-  width: 50% !important;
-  min-width: 0 !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  display: block !important;
-  box-sizing: border-box !important;
+  width: 50%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* Form panel derecho: ocupa la otra mitad y 100% alto */
 .reg-form {
-  width: 50% !important;
-  height: 100% !important;
-  padding: 48px 60px !important;
-  background: var(--panel-pink) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 18px !important;
-  position: relative !important;
-  overflow-y: auto !important;
-  box-sizing: border-box !important;
+  width: 50%;
+  height: 100%;
+  padding: 48px 60px;
+  background: var(--panel-pink);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
 }
 
-/* Mantener título centrado */
 .reg-title {
-  margin: 0 auto !important;
-  font-size: 30px !important;
-  font-weight: 800 !important;
-  color: var(--text) !important;
+  margin: 0 auto;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text);
 }
 
-/* Grid de inputs (dos columnas) */
 .reg-grid {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 14px 22px !important;
-  width: 100% !important;
-  align-items: start !important;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 22px;
+  width: 100%;
+  align-items: start;
 }
 
-/* Campo que ocupa toda la fila */
-.reg-field--full { grid-column: 1 / -1 !important; }
+.reg-field--full {
+  grid-column: 1 / -1;
+}
 
-/* Inputs */
 .reg-field input[type="text"],
 .reg-field input[type="email"],
 .reg-field input[type="tel"],
 .reg-field input[type="date"],
 .reg-field input[type="password"],
 .reg-field input[type="file"],
-.reg-form input[type="text"],
-.reg-form input[type="email"],
-.reg-form input[type="tel"],
-.reg-form input[type="date"],
-.reg-form input[type="password"],
-.reg-form input[type="file"]{
-  width: 100% !important;
-  height: 44px !important;
-  padding: 10px 14px !important;
-  border-radius: 10px !important;
-  border: 1px solid rgba(0,0,0,0.07) !important;
-  background: rgba(255,255,255,0.98) !important;
-  box-sizing: border-box !important;
-  outline: none !important;
+.reg-field select {
+  width: 100%;
+  height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  background: rgba(255, 255, 255, 0.98);
+  box-sizing: border-box;
+  outline: none;
 }
 
-/* Botón Registrar: flotante y visible */
-.reg-form button[type="submit"].reg-btn--primary {
-  position: fixed !important;          /* fijado en viewport para que siempre se vea */
-  right: 28px !important;
-  bottom: 28px !important;
-  width: 84px !important;
-  height: 84px !important;
-  border-radius: 50% !important;
-  padding: 0 !important;
-  z-index: 9999 !important;
-  box-shadow: 0 20px 40px rgba(45,69,200,0.18) !important;
-  background: linear-gradient(180deg, var(--accent), var(--accent-dark)) !important;
-  color: #fff !important;
-  border: none !important;
+.reg-field select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat, repeat;
+  background-position: right .7em top 50%, 0 0;
+  background-size: .65em auto, 100%;
 }
 
-/* Back botón a la izquierda (en flujo) */
-.reg-btn--secondary {
-  background: #efefef !important;
-  color: #222 !important;
-  border: 1px solid rgba(0,0,0,0.06) !important;
+.reg-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.reg-preview-placeholder {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #a0aec0;
+  font-size: 18px;
+}
+
+.reg-preview {
+  width: 128px;
+  height: 128px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid var(--accent);
+}
+
+.reg-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.reg-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .reg-agree {
-  margin-top: 90px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 14px;
 }
-/* Responsive: apilar en móviles */
+
+.reg-forgot {
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.reg-forgot:hover {
+  text-decoration: underline;
+}
+
+.reg-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.reg-btn--primary {
+  background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+  color: #fff;
+  border: none;
+  width: 100%;
+}
+
+.reg-btn--primary:hover {
+  transform: translateY(-2px);
+}
+
+.reg-login-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.reg-login-link p {
+  color: var(--text);
+}
+
+.reg-login-link a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.reg-login-link a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 920px) {
   .reg-container {
-    flex-direction: column !important;
+    flex-direction: column;
   }
-  .reg-image { width: 100% !important; height: 360px !important; }
-  .reg-form { width: 100% !important; height: auto !important; padding: 20px !important; }
-  .reg-form button[type="submit"].reg-btn--primary {
-    right: 18px !important;
-    bottom: 16px !important;
-    width: 64px !important;
-    height: 64px !important;
+  .reg-image {
+    width: 100%;
+    height: 360px;
+  }
+  .reg-form {
+    width: 100%;
+    height: auto;
+    padding: 20px;
   }
 }

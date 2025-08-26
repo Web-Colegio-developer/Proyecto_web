@@ -1,10 +1,11 @@
 import { useState } from "react";
 import COVER_IMAGE from "../assets/Imagen_Login.png";
 import "./Registro.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const REGISTRO = ({ onRegister }) => {
   const [preview, setPreview] = useState(null);
+  const navigate = useNavigate();
 
   // Campos básicos
   const [nombre, setNombre] = useState("");
@@ -30,47 +31,49 @@ const REGISTRO = ({ onRegister }) => {
     }
   };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  if (!nombre || !apellido || !email || !telefono || !direccion || !fechaNacimiento || !ciudad || !password) {
-    setError("Por favor complete todos los campos.");
-    return;
-  }
+    if (!nombre || !apellido || !email || !telefono || !direccion || !fechaNacimiento || !ciudad || !password) {
+      setError("Por favor complete todos los campos.");
+      return;
+    }
 
-  // Crear FormData
-  const formData = new FormData();
-  formData.append("nombre", nombre);
-  formData.append("apellido", apellido);
-  formData.append("email", email);
-  formData.append("telefono", telefono);
-  formData.append("direccion", direccion);
-  formData.append("fechaNacimiento", fechaNacimiento);
-  formData.append("ciudad", ciudad);
-  formData.append("gender", gender);
-  formData.append("password", password);
-  formData.append("rol", "estudiante"); // por default
-  if (document.getElementById("foto").files[0]) {
-    formData.append("foto", document.getElementById("foto").files[0]);
-  }
+    // Crear FormData
+    const formData = new FormData();
+    formData.append("nombre", nombre);
+    formData.append("apellido", apellido);
+    formData.append("email", email);
+    formData.append("telefono", telefono);
+    formData.append("direccion", direccion);
+    formData.append("fechaNacimiento", fechaNacimiento);
+    formData.append("ciudad", ciudad);
+    formData.append("gender", gender);
+    formData.append("password", password);
+    formData.append("rol", "estudiante"); // por default
+    if (document.getElementById("foto").files[0]) {
+      formData.append("foto", document.getElementById("foto").files[0]);
+    }
 
-  fetch("http://localhost:3001/register", {
-    method: "POST",
-    body: formData, // 👈 no necesitas headers de JSON aquí
-  })
-    .then((res) => res.json())
-    .then((res) => {
-      if (res.result !== "Registro exitoso") {
-        setError(res.message);
-      } else {
-        setMsg(res.result);
-        onRegister(res.user);
-      }
+    fetch("http://localhost:3001/register", {
+      method: "POST",
+      body: formData,
     })
-    .catch((err) => {
-      setError("Error en la conexión al servidor: " + err.message);
-    });
-};
+      .then((res) => res.json())
+      .then((res) => {
+        if (!res.success) {
+          setError(res.message);
+        } else {
+          setMsg("¡Registro exitoso! Redirigiendo al login...");
+          setTimeout(() => {
+            navigate("/login");
+          }, 2000);
+        }
+      })
+      .catch((err) => {
+        setError("Error en la conexión al servidor: " + err.message);
+      });
+  };
 
   return (
     <div className="reg-root">
@@ -90,8 +93,9 @@ const handleSubmit = (e) => {
               <input type="file" id="foto" accept="image/*" onChange={handleImageChange} />
             </div>
 
+            {/* Foto Preview */}
             {preview && (
-              <div className="reg-field">
+              <div className="reg-field reg-field--full reg-preview-container">
                 <label>Vista previa</label>
                 <img src={preview} alt="Vista previa" className="reg-preview" />
               </div>
@@ -112,7 +116,7 @@ const handleSubmit = (e) => {
             </div>
 
             <div className="reg-field">
-              <input type="tel" placeholder="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+              <input type="text" placeholder="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value.replace(/[^0-9]/g, ''))} />
             </div>
 
             {/* Dirección y Fecha */}
@@ -130,37 +134,30 @@ const handleSubmit = (e) => {
             </div>
 
             <div className="reg-field">
-            <label>Género</label>
-            <input
-                type="text"
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-                placeholder="Escribe tu género"
-                className="reg-input"
-            />
+              <select value={gender} onChange={(e) => setGender(e.target.value)} className="reg-input">
+                <option value="" disabled>Seleccione su género</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </select>
             </div>
 
             {/* Contraseña */}
-            <div className="reg-field">
+            <div className="reg-field reg-field--full">
               <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
+          </div>
 
-            {/* Checkbox */}
-            <div className="reg-row reg-row--full">
+          <div className="reg-actions">
+            <div className="reg-row">
               <label className="reg-agree">
                 <input type="checkbox" /> Acepta Términos y Condiciones
               </label>
               <a className="reg-forgot" href="#">¿Olvidó su Contraseña?</a>
             </div>
 
-            {/* Botones */}
-            <div className="reg-row reg-row--full reg-row--actions">
-              <button type="button" className="reg-btn reg-btn--secondary">Back</button>
-              <button type="submit" className="reg-btn reg-btn--primary">Registrar</button>
-            </div>
+            <button type="submit" className="reg-btn reg-btn--primary">Registrar</button>
 
-            {/* Link login */}
-            <div className="reg-login-link reg-row--full">
+            <div className="reg-login-link">
               <p>¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link></p>
             </div>
           </div>

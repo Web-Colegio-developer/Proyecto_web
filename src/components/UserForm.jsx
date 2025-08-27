@@ -119,11 +119,8 @@ const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
                 </select>
               </div>
               <div className="form-group">
-                <label>Estado</label>
-                <select name="estado" value={formData.estado || 'activo'} onChange={handleChange}>
-                  <option value="activo">Activo</option>
-                  <option value="inactivo">Inactivo</option>
-                </select>
+                <label>Monedas</label>
+                <input type="number" name="balance" value={formData.balance || 0} onChange={handleChange} />
               </div>
             </div>
 

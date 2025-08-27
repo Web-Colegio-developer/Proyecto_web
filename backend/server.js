@@ -82,46 +82,76 @@ app.get('/users/:id', async (req, res) => {
 
 app.put('/users/:id', async (req, res) => {
   const { id } = req.params;
-  const userData = req.body;
+  const { balance, saldo, ...userData } = req.body;
+  const balanceToUpdate = balance || saldo;
 
-  // Evitar que se actualice el correo electrónico si no se proporciona
-  if (userData.correo_electronico === '' || userData.correo_electronico === undefined) {
-    delete userData.correo_electronico;
-  }
-
-  // Evitar que se actualice el saldo
-  delete userData.saldo;
-
-  // Si la contraseña está vacía, no la actualices
-  if (userData.passwords === '' || userData.passwords === undefined) {
-    delete userData.passwords;
-  }
 
   try {
+    // Evitar que se actualice el correo electrónico si no se proporciona
+    if (userData.correo_electronico === '' || userData.correo_electronico === undefined) {
+      delete userData.correo_electronico;
+    }
+
+    // Si la contraseña está vacía, no la actualices
+    if (userData.passwords === '' || userData.passwords === undefined) {
+      delete userData.passwords;
+    }
+
     const fields = [];
     const values = [];
 
     for (const key in userData) {
       if (userData.hasOwnProperty(key)) {
-        fields.push(`${key} = ?`);
-        values.push(userData[key]);
+        let value = userData[key];
+
+        if (key === 'fecha_nacimiento') {
+          // Format the date to YYYY-MM-DD
+          value = new Date(value).toISOString().split('T')[0];
+        }
+
+        if (value !== '' && value !== undefined) {
+          fields.push(`${key} = ?`);
+          values.push(value);
+        }
       }
     }
 
-    if (fields.length === 0) {
+    if (fields.length === 0 && balanceToUpdate === null) {
       return res.status(400).json({ success: false, message: 'No hay datos para actualizar' });
     }
 
-    const query = `UPDATE usuarios SET ${fields.join(', ')} WHERE id = ?`;
-    values.push(id);
-
-    const [result] = await pool.query(query, values);
-
-    if (result.affectedRows > 0) {
-      res.json({ success: true, message: 'Perfil actualizado correctamente' });
-    } else {
-      res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    // Update usuarios table
+    if (fields.length > 0) {
+      const query = `UPDATE usuarios SET ${fields.join(', ')} WHERE id = ?`;
+      await pool.query(query, [...values, id]);
     }
+
+    // Update monedas table if balance is provided
+    if (balanceToUpdate !== null) {
+      const email = userData.correo_electronico;
+      if (email) {
+        const [monedasResult] = await pool.query(
+          'UPDATE monedas m JOIN usuarios u ON m.usuario_id = u.id SET m.saldo = ? WHERE u.correo_electronico = ?',
+          [balanceToUpdate, email]
+        );
+        if (monedasResult.affectedRows === 0) {
+          // If no row was updated, it might be because the user has no entry in the monedas table.
+          // We will try to insert one. We need the user's id for this.
+          await pool.query('INSERT INTO monedas (usuario_id, saldo) VALUES (?, ?)', [id, balanceToUpdate]);
+        }
+      } else {
+        // Fallback to original logic if no email is provided in the body
+        const [monedasResult] = await pool.query(
+          'UPDATE monedas SET saldo = ? WHERE usuario_id = ?',
+          [balanceToUpdate, id]
+        );
+        if (monedasResult.affectedRows === 0) {
+          await pool.query('INSERT INTO monedas (usuario_id, saldo) VALUES (?, ?)', [id, balanceToUpdate]);
+        }
+      }
+    }
+
+    res.json({ success: true, message: 'Perfil actualizado correctamente' });
   } catch (error) {
     console.error('Error al actualizar el perfil:', error);
     res.status(500).json({ message: 'Error en la conexión al servidor' });
@@ -145,7 +175,9 @@ app.delete('/users/:id', async (req, res) => {
 
 app.get('/users', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, nombres, apellidos, correo_electronico, foto, rol FROM usuarios');
+    const [rows] = await pool.query(
+      'SELECT u.id, u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, u.telefono, u.direccion, u.fecha_nacimiento, u.lugar, u.genero, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id'
+    );
     res.json(rows);
   } catch (error) {
     console.error('Error al obtener los usuarios:', error);

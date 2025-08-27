@@ -4,36 +4,45 @@ import './Sliderbar.css';
 import { SidebarData } from '../Data/Data';
 import { UilSignOutAlt } from '@iconscout/react-unicons';
 
-const Sliderbar = ({ onLogout, user }) => {
+const Sliderbar = ({ onLogout, user, setView, activeSection }) => {
 
-        const [selected, setSelected] = React.useState(0);
+    const handleMenuItemClick = (section) => {
+        setView(section);
+    };
 
     return (
         <div className="sliderbar">
-            {/*  Logo */}
             <div className="logo">
-                {user && <img src={user.avatarUrl} alt=""/>}
+                {user && <img src={user.avatarUrl} alt="Avatar del usuario"/>}
                 <span>  
                     {user ? user.name : 'Administrador'}
                 </span>
             </div>
 
-            {/*  Menu */}
             <div className="menu">
-                    {SidebarData.map((item, index) => {
-                        return (
-                            <div className={selected===index? 'menu-item active': 'menu-item'} 
+                {SidebarData.map((item, index) => {
+                    // Normalizamos el nombre de la sección para usarlo como identificador
+                    const sectionName = item.heading === 'Panel Inicio' 
+                        ? 'dashboard' 
+                        : item.heading.toLowerCase().replace(' ', '-');
+
+                    return (
+                        <div 
+                            className={`menu-item ${activeSection === sectionName ? 'active' : ''}`}
                             key={index}
-                            onClick={()=>setSelected(index)}
-                            >
-                                <item.icon />
-                                <span>
-                                    {item.heading}
-                                </span>
-                            </div>
-                        );
-                    })}
-                <div className="menu-item" onClick={onLogout}>
+                            onClick={() => handleMenuItemClick(sectionName)}
+                            role="button"
+                            tabIndex="0"
+                            aria-label={`Ir a ${item.heading}`}
+                        >
+                            <item.icon />
+                            <span>
+                                {item.heading}
+                            </span>
+                        </div>
+                    );
+                })}
+                <div className="menu-item" onClick={onLogout} role="button" tabIndex="0" aria-label="Cerrar sesión">
                     <UilSignOutAlt />
                     <span>Salir</span> 
                 </div>

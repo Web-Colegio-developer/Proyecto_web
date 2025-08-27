@@ -178,6 +178,16 @@ app.put('/profile/:email', async (req, res) => {
   }
 });
 
+app.get('/users', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, nombres, apellidos, correo_electronico, foto, rol FROM usuarios');
+    res.json(rows);
+  } catch (error) {
+    console.error('Error al obtener los usuarios:', error);
+    res.status(500).json({ message: 'Error en la conexión al servidor' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`El servidor se está ejecutando en http://localhost:${port}`);
 });

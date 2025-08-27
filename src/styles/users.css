@@ -1,0 +1,201 @@
+/* src/styles/users.css */
+
+.users-section {
+  padding: 2rem;
+  background-color: #f4f7fa;
+  height: 100%;
+}
+
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.users-header h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.search-bar {
+  position: relative;
+}
+
+.search-bar input {
+  padding: 0.75rem 1.5rem 0.75rem 3rem;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  width: 300px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.search-bar input:focus {
+  border-color: #b87333;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  outline: none;
+}
+
+.search-bar .search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.user-card-button {
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.user-card-button:hover, .user-card-button:focus {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+  border-color: #b87333;
+  outline: none;
+}
+
+.user-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 1rem;
+  border: 3px solid #f0f0f0;
+}
+
+.user-name {
+  font-weight: bold;
+  color: #333;
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.user-role {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.no-users-found {
+  text-align: center;
+  padding: 3rem;
+  color: #777;
+  font-size: 1.2rem;
+}
+
+/* UserForm.jsx Side Panel Styles */
+.user-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* Allow clicking through when hidden */
+}
+
+.user-form-overlay.visible {
+  opacity: 1;
+  pointer-events: auto; /* Block clicks when visible */
+}
+
+.user-form-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  background: #fff;
+  box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+  border-left: 1px solid #eee;
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-form-panel.visible {
+  transform: translateX(0);
+}
+
+.user-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #eee;
+  background: #fcfcfc;
+}
+
+.user-form-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.user-form-content {
+  padding: 2rem;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.profile-image-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 1rem auto;
+  display: block;
+  border: 4px solid #eee;
+}
+
+.user-form-footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #eee;
+  background: #f9f9f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .user-form-panel {
+    width: 100%;
+  }
+}

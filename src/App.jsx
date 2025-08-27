@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './App.css';
+import './styles/users.css'; // Import styles
 import LoginForm from './components/LoginForm';
 import Registro from './components/Registro';
-import Header from './components/Header'; 
+import Header from './components/Header';
 import UserProfile from './components/UserProfile';
-import Tarjeta from './components/tarjeta'; // 👈 Importa la tarjeta
+import Tarjeta from './components/tarjeta';
 import Administrador from './components/Administrador';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]); // State for all users
+  const [selectedUser, setSelectedUser] = useState(null); // State for selected user
+  const [view, setView] = useState('dashboard'); // State for admin view
   const [showRegister, setShowRegister] = useState(false);
-  const [mostrarTarjeta, setMostrarTarjeta] = useState(false); // 👈 Estado para la tarjeta
+  const [mostrarTarjeta, setMostrarTarjeta] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,21 +25,18 @@ function App() {
       setUser(foundUser);
       if (foundUser.role === 'administrador') {
         navigate('/administrador');
+        fetchUsers(); // Fetch users if admin
       }
     } else {
-      // Solo redirigir a /login si no estás en /register
       if (window.location.pathname !== "/register") {
         navigate('/login');
       }
     }
   }, [navigate]);
 
-  // 👉 Refrescar datos del usuario (saldo, nombre, foto) desde backend
   useEffect(() => {
     let intervalId;
-
-    const fetchUserBalance = async () => {  
-
+    const fetchUserBalance = async () => {
       if (user && user.email) {
         try {
           const response = await fetch(`http://localhost:3001/profile/${user.email}`);
@@ -57,34 +58,45 @@ function App() {
         }
       }
     };
-
     if (user) {
       fetchUserBalance();
-      intervalId = setInterval(fetchUserBalance, 15000); 
+      intervalId = setInterval(fetchUserBalance, 15000);
     }
-
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
   }, [user]);
 
-  // 👉 Manejo de login
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      } else {
+        console.error('Error al obtener los usuarios');
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+    }
+  };
+
   const handleLogin = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
     if (userData.role === 'administrador') {
       navigate('/administrador');
+      fetchUsers();
     } else {
       navigate('/');
     }
   };
 
-  // 👉 Manejo de logout
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
     navigate('/login');
-    window.location.reload(); // Force a full page reload
+    window.location.reload();
   };
 
   const handleSwitchToRegister = () => {
@@ -100,17 +112,31 @@ function App() {
   return (
     <>
       {user && user.role !== 'administrador' && (
-        <Header 
-          user={user} 
-          onLogout={handleLogout} 
-          onBalanceClick={() => setMostrarTarjeta(true)} // 👉 Click en saldo muestra tarjeta
+        <Header
+          user={user}
+          onLogout={handleLogout}
+          onBalanceClick={() => setMostrarTarjeta(true)}
         />
       )}
       <Routes>
         {user ? (
           <>
             {user.role === 'administrador' ? (
-              <Route path="/administrador" element={<Administrador onLogout={handleLogout} user={user} />} />
+              <Route
+                path="/administrador"
+                element={
+                  <Administrador
+                    onLogout={handleLogout}
+                    user={user}
+                    view={view}
+                    setView={setView}
+                    users={users}
+                    setUsers={setUsers}
+                    selectedUser={selectedUser}
+                    setSelectedUser={setSelectedUser}
+                  />
+                }
+              />
             ) : (
               <Route path="/" element={<div><h1>AQUI METEMOS LOS PRODUCTOS</h1></div>} />
             )}
@@ -122,15 +148,13 @@ function App() {
             <Route path="/login" element={<LoginForm onLogin={handleLogin} onSwitchToRegister={handleSwitchToRegister} />} />
             <Route path="/register" element={<Registro onRegister={handleLogin} onSwitchToLogin={handleSwitchToLogin} />} />
             <Route path="*" element={<Navigate to="/login" />} />
-          </>
-        )}
+          </>)}
       </Routes>
 
-      {/* 👇 Modal de la tarjeta */}
-      <Tarjeta 
-        user={user} 
-        open={mostrarTarjeta} 
-        onClose={() => setMostrarTarjeta(false)} 
+      <Tarjeta
+        user={user}
+        open={mostrarTarjeta}
+        onClose={() => setMostrarTarjeta(false)}
       />
     </>
   );

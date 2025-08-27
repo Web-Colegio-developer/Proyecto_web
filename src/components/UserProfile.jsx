@@ -12,14 +12,14 @@ export default function PerfilUsuario({ user }) {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!user || !user.email) {
-        setError("No se ha proporcionado un correo electrónico de usuario.");
+      if (!user || !user.id) {
+        setError("No se ha proporcionado un ID de usuario.");
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`http://localhost:3001/profile/${user.email}`);
+        const response = await fetch(`http://localhost:3001/users/${user.id}`);
         if (!response.ok) {
           throw new Error('Error al obtener los datos del perfil');
         }
@@ -51,8 +51,8 @@ export default function PerfilUsuario({ user }) {
   };
 
   const handleSaveChanges = async () => {
-    if (!user || !user.email) {
-      setError("No se puede guardar el perfil sin un correo electrónico de usuario.");
+    if (!user || !user.id) {
+      setError("No se puede guardar el perfil sin un ID de usuario.");
       return;
     }
 
@@ -73,7 +73,7 @@ export default function PerfilUsuario({ user }) {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/profile/${user.email}`, {
+      const response = await fetch(`http://localhost:3001/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

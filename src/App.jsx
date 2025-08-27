@@ -37,9 +37,9 @@ function App() {
   useEffect(() => {
     let intervalId;
     const fetchUserBalance = async () => {
-      if (user && user.email) {
+      if (user && user.id) { // Use user.id instead of user.email
         try {
-          const response = await fetch(`http://localhost:3001/profile/${user.email}`);
+          const response = await fetch(`http://localhost:3001/users/${user.id}`); // Use /users/:id endpoint
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.data) {

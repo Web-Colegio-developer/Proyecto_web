@@ -5,11 +5,9 @@ const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
   const [formData, setFormData] = useState(user || {});
 
   useEffect(() => {
-    // Update form data when user changes or when the form becomes visible
     if (isVisible && user) {
       setFormData(user);
     } else if (!isVisible) {
-      // Optional: clear form data when panel is hidden
       setFormData({});
     }
   }, [user, isVisible]);
@@ -19,7 +17,7 @@ const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nombres || !formData.correo_electronico) {
       alert('El nombre y el correo electrónico son obligatorios.');
@@ -29,16 +27,46 @@ const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
         alert('Por favor, introduce un correo electrónico válido.');
         return;
     }
-    onSave(formData);
-  };
+    
+    try {
+      const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-  const handleDelete = () => {
-    if (window.confirm('¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.')) {
-      onDelete(user.id);
+      if (response.ok) {
+        onSave(formData);
+      } else {
+        alert('Error al guardar los cambios.');
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+      alert('Error de red al guardar los cambios.');
     }
   };
 
-  // Prevent form from closing when clicking inside the panel
+  const handleDelete = async () => {
+    if (window.confirm('¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.')) {
+      try {
+        const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          onDelete(user.id);
+        } else {
+          alert('Error al eliminar el usuario.');
+        }
+      } catch (error) {
+        console.error('Error de red:', error);
+        alert('Error de red al eliminar el usuario.');
+      }
+    }
+  };
+
   const handlePanelClick = (e) => {
     e.stopPropagation();
   };

@@ -37,12 +37,13 @@ app.post('/login', async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      'SELECT u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ? AND u.passwords = ?',
+      'SELECT u.id, u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ? AND u.passwords = ?',
       [user, pass]
     );
 
     if (rows.length > 0) {
       const userData = {
+        id: rows[0].id, // Add the user's ID
         name: `${rows[0].nombres} ${rows[0].apellidos}`,
         email: rows[0].correo_electronico,
         avatarUrl: rows[0].foto,
@@ -59,19 +60,15 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.get('/profile/:email', async (req, res) => {
-  const { email } = req.params;
 
-  if (!email) {
-    return res.status(400).json({ message: 'Por favor, proporcione un correo electrónico' });
-  }
 
+app.get('/users/:id', async (req, res) => {
+  const { id } = req.params;
   try {
     const [rows] = await pool.query(
-      'SELECT u.*, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ?',
-      [email]
+      'SELECT u.*, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.id = ?',
+      [id]
     );
-
     if (rows.length > 0) {
       res.json({ success: true, data: rows[0] });
     } else {
@@ -83,12 +80,14 @@ app.get('/profile/:email', async (req, res) => {
   }
 });
 
-app.put('/profile/:email', async (req, res) => {
-  const { email } = req.params;
+app.put('/users/:id', async (req, res) => {
+  const { id } = req.params;
   const userData = req.body;
 
-    // Evitar que se actualice el correo electrónico
-  delete userData.correo_electronico;
+  // Evitar que se actualice el correo electrónico si no se proporciona
+  if (userData.correo_electronico === '' || userData.correo_electronico === undefined) {
+    delete userData.correo_electronico;
+  }
 
   // Evitar que se actualice el saldo
   delete userData.saldo;
@@ -98,62 +97,14 @@ app.put('/profile/:email', async (req, res) => {
     delete userData.passwords;
   }
 
-  if (!email) {
-    return res.status(400).json({ message: 'Por favor, proporcione un correo electrónico' });
-  }
-
   try {
     const fields = [];
     const values = [];
 
     for (const key in userData) {
       if (userData.hasOwnProperty(key)) {
-        // Map frontend keys to database column names if they differ
-        let dbColumnName = key;
-        switch (key) {
-          case 'nombres':
-            dbColumnName = 'nombres';
-            break;
-          case 'apellidos':
-            dbColumnName = 'apellidos';
-            break;
-          case 'correo_electronico':
-            dbColumnName = 'correo_electronico';
-            break;
-          case 'telefono':
-            dbColumnName = 'telefono';
-            break;
-          case 'direccion':
-            dbColumnName = 'direccion';
-            break;
-          case 'fecha_nacimiento':
-            dbColumnName = 'fecha_nacimiento';
-            break;
-          case 'lugar': // Assuming 'lugar' is for city
-            dbColumnName = 'lugar';
-            break;
-          case 'genero':
-            dbColumnName = 'genero';
-            break;
-          case 'passwords':
-            dbColumnName = 'passwords';
-            break;
-          case 'foto':
-            dbColumnName = 'foto';
-            break;
-          case 'rol':
-            dbColumnName = 'rol';
-            break;
-          default:
-            // If the key is not explicitly mapped, assume it's a direct column name
-            break;
-        }
-
-        // Only add to update if the value is not empty or undefined
-        if (userData[key] !== '' && userData[key] !== undefined) {
-          fields.push(`${dbColumnName} = ?`);
-          values.push(userData[key]);
-        }
+        fields.push(`${key} = ?`);
+        values.push(userData[key]);
       }
     }
 
@@ -161,8 +112,8 @@ app.put('/profile/:email', async (req, res) => {
       return res.status(400).json({ success: false, message: 'No hay datos para actualizar' });
     }
 
-    const query = `UPDATE usuarios SET ${fields.join(', ')} WHERE correo_electronico = ?`;
-    values.push(email);
+    const query = `UPDATE usuarios SET ${fields.join(', ')} WHERE id = ?`;
+    values.push(id);
 
     const [result] = await pool.query(query, values);
 
@@ -173,7 +124,21 @@ app.put('/profile/:email', async (req, res) => {
     }
   } catch (error) {
     console.error('Error al actualizar el perfil:', error);
-    console.log(error);
+    res.status(500).json({ message: 'Error en la conexión al servidor' });
+  }
+});
+
+app.delete('/users/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await pool.query('DELETE FROM usuarios WHERE id = ?', [id]);
+    if (result.affectedRows > 0) {
+      res.json({ success: true, message: 'Usuario eliminado correctamente' });
+    } else {
+      res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al eliminar el usuario:', error);
     res.status(500).json({ message: 'Error en la conexión al servidor' });
   }
 });

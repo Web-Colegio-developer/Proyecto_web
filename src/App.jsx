@@ -8,6 +8,7 @@ import Header from './components/Header';
 import UserProfile from './components/UserProfile';
 import Tarjeta from './components/tarjeta';
 import Administrador from './components/Administrador';
+import ProductsGrid from './components/ProductsGrid';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -138,7 +139,7 @@ function App() {
                 }
               />
             ) : (
-              <Route path="/" element={<div><h1>AQUI METEMOS LOS PRODUCTOS</h1></div>} />
+              <Route path="/" element={<ProductsGrid />} />
             )}
             <Route path="/profile" element={<UserProfile user={user} />} />
             <Route path="*" element={<Navigate to={user.role === 'administrador' ? '/administrador' : '/'} />} />

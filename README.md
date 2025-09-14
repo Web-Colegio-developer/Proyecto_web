@@ -63,11 +63,11 @@ Se sigue una estrategia de releases semánticos (SemVer). Cada release represent
 
 | Fase | Entregables principales | Tag / Release sugerido |
 |---|---:|---|
-| Fase 1 — Análisis y Diseño | Documento de requisitos, prototipos de pantallas, especificación de API (Swagger/Postman). | **v0.1.0** — Release title: "Fase 1 — Análisis y Diseño (v0.1.0)" |
-| Fase 2 — Backend — Django & MySQL | API funcional (Swagger/Postman), base de datos normalizada, endpoints probados. | **v0.2.0** — "Fase 2 — Backend (v0.2.0)" |
-| Fase 3 — Frontend — React | Frontend funcional conectado al backend, flujo completo compra-recarga. | **v0.3.0** — "Fase 3 — Frontend (v0.3.0)" |
-| Fase 4 — Integración y Pruebas | Plataforma probada end-to-end; preparada para pruebas piloto. | **v1.0.0** — "Fase 4 — Integración y Pruebas (v1.0.0)" |
-| Fase 5 — Despliegue y Mantenimiento | Sistema en producción, documentación técnica y manual de usuario. | **v1.1.0** — "Fase 5 — Despliegue y Mantenimiento (v1.1.0)" |
+| Fase 1  Análisis y Diseño | Documento de requisitos, prototipos de pantallas, especificación de API (Swagger/Postman). | **v0.1.0** — Release title: "Fase 1 — Análisis y Diseño (v0.1.0)" |
+| Fase 2  Backend / Django & MySQL | API funcional (Swagger/Postman), base de datos normalizada, endpoints probados. | **v0.2.0** — "Fase 2 — Backend (v0.2.0)" |
+| Fase 3  Frontend / React | Frontend funcional conectado al backend, flujo completo compra-recarga. | **v0.3.0** — "Fase 3 — Frontend (v0.3.0)" |
+| Fase 4  Integración y Pruebas | Plataforma probada end-to-end; preparada para pruebas piloto. | **v1.0.0** — "Fase 4 — Integración y Pruebas (v1.0.0)" |
+| Fase 5  Despliegue y Mantenimiento | Sistema en producción, documentación técnica y manual de usuario. | **v1.1.0** — "Fase 5 — Despliegue y Mantenimiento (v1.1.0)" |
 
 
 ## Roadmap / Hitos futuros

@@ -57,20 +57,24 @@ Este proyecto es una plataforma web que integra un frontend en React (Vite), un 
 - Express, mysql2, multer, dotenv
 
 
-## Entregables    
+## Entregables & Releases
 
-Etiqueta de Git Propuesta
-Fase 1: Análisis y Diseño	Documento de requisitos, prototipos de pantallas, especificación de API.	v0.1.0-fase-diseno
-Fase 2: Backend – Django & MySQL	API funcional (Swagger/Postman), base de datos estructurada, endpoints probados.	v0.2.0-fase-backend
-Fase 3: Frontend – React	Frontend funcional, conectado al backend, con flujo completo de compra-recarga.	v0.3.0-fase-frontend
-Fase 4: Integración y Pruebas	Plataforma probada end-to-end, lista para pruebas piloto con estudiantes reales.	v1.0.0-MVP-final
-Fase 5: Despliegue y Mantenimiento	Sistema en producción, documentación técnica y manual de usuario.	v1.1.0-despliegue
+Se sigue una estrategia de releases semánticos (SemVer). Cada release representa una fase clave del proyecto.
+
+| Fase | Entregables principales | Tag / Release sugerido |
+|---|---:|---|
+| Fase 1 — Análisis y Diseño | Documento de requisitos, prototipos de pantallas, especificación de API (Swagger/Postman). | **v0.1.0** — Release title: "Fase 1 — Análisis y Diseño (v0.1.0)" |
+| Fase 2 — Backend — Django & MySQL | API funcional (Swagger/Postman), base de datos normalizada, endpoints probados. | **v0.2.0** — "Fase 2 — Backend (v0.2.0)" |
+| Fase 3 — Frontend — React | Frontend funcional conectado al backend, flujo completo compra-recarga. | **v0.3.0** — "Fase 3 — Frontend (v0.3.0)" |
+| Fase 4 — Integración y Pruebas | Plataforma probada end-to-end; preparada para pruebas piloto. | **v1.0.0** — "Fase 4 — Integración y Pruebas (v1.0.0)" |
+| Fase 5 — Despliegue y Mantenimiento | Sistema en producción, documentación técnica y manual de usuario. | **v1.1.0** — "Fase 5 — Despliegue y Mantenimiento (v1.1.0)" |
 
 
-## Requisito Futuro    
+## Roadmap / Hitos futuros
 
-Hito de Git Propuesto
-Integración con sistemas de analítica de consumo.	Hito: Analítica y Personalización
-Inclusión de programas de fidelización (puntos, recompensas).	Hito: Programas de Fidelización
-Implementación de pagos mediante tecnologías sin contacto (NFC/QR).	Hito: Pagos Sin Contacto
-Integración con billeteras digitales externas (ej. Nequi, Daviplata).	Hito: Integración con Billeteras Digitales
+- **Hito: Analítica y Personalización** — Integración con sistemas de analítica de consumo.
+- **Hito: Programas de Fidelización** — Puntos y recompensas.
+- **Hito: Pagos Sin Contacto** — NFC / QR para recargas.
+- **Hito: Integración con Billeteras Digitales** — Ej: Nequi, Daviplata.
+
+Estos hitos se registran como **Milestones** / Issues etiquetados para seguimiento.

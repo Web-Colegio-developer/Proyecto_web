@@ -93,6 +93,27 @@ function App() {
     }
   };
 
+  const handleGoogleLogin = (credentialResponse) => {
+    fetch("http://localhost:3001/auth/google", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ credential: credentialResponse.credential }),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.result !== "Login exitoso") {
+          console.error(response.message);
+        } else {
+          handleLogin(response.user);
+        }
+      })
+      .catch((err) => {
+        console.error("Error en la conexión al servidor: " + err.message);
+      });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
@@ -146,7 +167,7 @@ function App() {
           </>
         ) : (
           <>
-            <Route path="/login" element={<LoginForm onLogin={handleLogin} onSwitchToRegister={handleSwitchToRegister} />} />
+            <Route path="/login" element={<LoginForm onLogin={handleLogin} onGoogleLogin={handleGoogleLogin} onSwitchToRegister={handleSwitchToRegister} />} />
             <Route path="/register" element={<Registro onRegister={handleLogin} onSwitchToLogin={handleSwitchToLogin} />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </>)}

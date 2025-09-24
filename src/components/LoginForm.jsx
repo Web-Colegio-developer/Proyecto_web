@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import COVER_IMAGE from "../assets/Imagen_Login.png";
 import "./LoginForm.css";
 import { Link } from "react-router-dom";
+import { GoogleLogin } from '@react-oauth/google';
 
 
-function Login({ onLogin }) {
+function LoginForm({ onLogin, onGoogleLogin, onSwitchToRegister }) {
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
@@ -55,6 +56,14 @@ function Login({ onLogin }) {
       });
   };
 
+  const handleGoogleSuccess = (credentialResponse) => {
+    onGoogleLogin(credentialResponse);
+  };
+
+  const handleGoogleError = () => {
+    setError("Error durante el inicio de sesión con Google. Por favor, intente de nuevo.");
+  };
+
   return (
     <div className="login">
       <div className="Contenedor_Imagen">
@@ -95,9 +104,17 @@ function Login({ onLogin }) {
             Iniciar Sesión
           </button>
 
+          <div className="google-login-container" style={{marginTop: '1rem', display: 'flex', justifyContent: 'center'}}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap
+            />
+          </div>
+
           <div className="register-link">
             <p>
-              No tienes Cuenta? <Link to="/register">Regístrate</Link>
+              No tienes Cuenta? <Link to="/register" onClick={onSwitchToRegister}>Regístrate</Link>
             </p>
           </div>
         </form>
@@ -106,4 +123,4 @@ function Login({ onLogin }) {
   );
 }
 
-export default Login;
+export default LoginForm;

@@ -10,6 +10,7 @@ const ADMINISTRADOR = ({ onLogout, user, view, setView, users, setUsers, selecte
         return <Users users={users} setUsers={setUsers} selectedUser={selectedUser} setSelectedUser={setSelectedUser} />;
       // case 'products':
       //   return <Products />;
+      // Agrega más casos según sea necesario
       default:
         return <div><h1>Dashboard</h1></div>; // O un componente Dashboard
     }

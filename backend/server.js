@@ -235,9 +235,9 @@ app.post("/register", upload.single("foto"), async (req, res) => {
     const rolUsuario = rol?.trim() || "estudiante";
 
     await pool.query(
-      `INSERT INTO usuarios 
-       (nombres, apellidos, correo_electronico, telefono, direccion, fecha_nacimiento, lugar, genero, passwords, foto, rol) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO usuarios 
+        (nombres, apellidos, correo_electronico, telefono, direccion, fecha_nacimiento, lugar, genero, passwords, foto, rol) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         nombre.trim(),
         apellido.trim(),

@@ -7,6 +7,8 @@ import pool from './db.js';
 import multer from 'multer';
 import path from "path";
 import { OAuth2Client } from 'google-auth-library';
+import fs from 'fs';
+
 
 console.log("Dependencias importadas.");
 
@@ -313,3 +315,168 @@ console.log("Preparando para escuchar en el puerto", port);
 app.listen(port, () => {
   console.log(`El servidor se está ejecutando en http://localhost:${port}`);
 });
+
+//Endpoints para tiendas y productos
+
+//Endpoint para obtener tiendas por ownerId
+app.get('/stores', async (req, res) => {
+  const ownerId = req.query.ownerId;
+  if (!ownerId) return res.status(400).json({ success: false, message: 'ownerId requerido' });
+
+  try {
+    const [rows] = await pool.query(
+      'SELECT id_tienda, id_usuario, nombre_tienda, direccion FROM tienda WHERE id_usuario = ?',
+      [ownerId]
+    );
+    return res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('Error GET /stores:', err && err.stack ? err.stack : err);
+    return res.status(500).json({ success: false, message: 'Error en la BD al obtener tiendas', error: err.message });
+  }
+});
+
+//Endpoint para obtener productos por storeId
+app.get('/stores/:storeId/products', async (req, res) => {
+  const { storeId } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM producto WHERE id_tienda = ?', [storeId]);
+
+    const normalized = rows.map(r => {
+      const imagenRaw = r.imagen ?? r.foto ?? r.imagen_url ?? r.image ?? r.url_imagen ?? r.img ?? null;
+      const filename = (typeof imagenRaw === 'string' && imagenRaw.length) ? path.basename(imagenRaw) : null;
+      const imageUrl = filename ? `${req.protocol}://${req.get('host')}/uploads/${filename}` : null;
+
+      return {
+        id_producto: r.id_producto ?? r.id ?? r.productId ?? null,
+        id_tienda: r.id_tienda ?? r.store_id ?? null,
+        nombre_producto: r.nombre_producto ?? r.name ?? r.title ?? null,
+        descripcion: r.descripcion ?? r.description ?? null,
+        tamaño: r.tamaño ?? r.tamano ?? r.size ?? null,
+        precio: r.precio ?? r.price ?? 0,
+        stock: r.stock ?? r.cantidad ?? 0,
+        raw: r,
+        imageUrl
+      };
+    });
+
+    return res.json({ success: true, data: normalized });
+  } catch (err) {
+    console.error(`Error GET /stores/${req.params.storeId}/products:`, err && err.stack ? err.stack : err);
+    return res.status(500).json({ success: false, message: 'Error en la BD al obtener productos por tienda', error: err.message });
+  }
+});
+
+//Endpoint para obtener productos (todos o por storeId)
+app.get('/products', async (req, res) => {
+  const { storeId } = req.query;
+  try {
+    let rows;
+    if (storeId) {
+      [rows] = await pool.query('SELECT * FROM producto WHERE id_tienda = ?', [storeId]);
+    } else {
+      [rows] = await pool.query('SELECT * FROM producto LIMIT 500');
+    }
+
+    const normalized = rows.map(r => {
+      const imagenRaw = r.imagen ?? r.foto ?? r.imagen_url ?? r.image ?? r.url_imagen ?? r.img ?? null;
+      const filename = (typeof imagenRaw === 'string' && imagenRaw.length) ? path.basename(imagenRaw) : null;
+      const imageUrl = filename ? `${req.protocol}://${req.get('host')}/uploads/${filename}` : null;
+
+      return {
+        id_producto: r.id_producto ?? r.id ?? r.productId ?? null,
+        id_tienda: r.id_tienda ?? r.store_id ?? null,
+        nombre_producto: r.nombre_producto ?? r.name ?? r.title ?? null,
+        descripcion: r.descripcion ?? r.description ?? null,
+        tamaño: r.tamaño ?? r.tamano ?? r.size ?? null,
+        precio: r.precio ?? r.price ?? 0,
+        stock: r.stock ?? r.cantidad ?? 0,
+        raw: r,
+        imageUrl
+      };
+    });
+
+    return res.json({ success: true, data: normalized });
+  } catch (err) {
+    console.error('Error GET /products:', err && err.stack ? err.stack : err);
+    return res.status(500).json({ success: false, message: 'Error en la BD al obtener productos', error: err.message });
+  }
+});
+
+//Endpoint para eliminar un producto por id
+// DELETE /products/:id
+app.delete('/products/:id', async (req, res) => {
+  const { id } = req.params;
+
+  // validar id
+  if (!id) {
+    return res.status(400).json({ success: false, message: 'ID requerido' });
+  }
+
+  try {
+    // Usamos solo id_producto porque esa es la columna real en tu BD
+    const [result] = await pool.query('DELETE FROM producto WHERE id_producto = ?', [id]);
+
+    if (result.affectedRows > 0) {
+      return res.json({ success: true, message: 'Producto eliminado' });
+    } else {
+      return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+    }
+  } catch (err) {
+    console.error(`Error DELETE /products/${id}`, err && err.stack ? err.stack : err);
+    return res.status(500).json({ success: false, message: 'Error en la BD', error: err.message });
+  }
+});
+
+//Actualizar 
+// PUT /products/:id
+app.put('/products/:id', async (req, res) => {
+  const { id } = req.params;
+  const { nombre_producto, precio, tamaño, stock } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: 'ID requerido' });
+  }
+
+  try {
+    const fields = [];
+    const values = [];
+
+    if (nombre_producto !== undefined) {
+      fields.push('nombre_producto = ?');
+      values.push(nombre_producto);
+    }
+    if (precio !== undefined) {
+      fields.push('precio = ?');
+      values.push(precio);
+    }
+    if (tamaño !== undefined) {
+      fields.push('tamaño = ?');
+      values.push(tamaño);
+    }
+    if (stock !== undefined) {
+      fields.push('stock = ?');
+      values.push(stock);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ success: false, message: 'Nada para actualizar' });
+    }
+
+    // Agregamos el id para la cláusula WHERE
+    values.push(id);
+
+    const sql = `UPDATE producto SET ${fields.join(', ')} WHERE id_producto = ?`;
+    const [result] = await pool.query(sql, values);
+
+    if (result.affectedRows > 0) {
+      return res.json({ success: true, message: 'Producto actualizado' });
+    } else {
+      return res.status(404).json({ success: false, message: 'Producto no encontrado' });
+    }
+  } catch (err) {
+    console.error(`Error PUT /products/${id}`, err && err.stack ? err.stack : err);
+    return res.status(500).json({ success: false, message: 'Error en la BD', error: err.message });
+  }
+});
+
+

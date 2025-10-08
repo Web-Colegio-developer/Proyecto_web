@@ -1,6 +1,7 @@
 import "./Administrador.css";
 import Sliderbar from "./Sliderbar";
 import Users from "./Users";
+import Store from "./Store";
 
 const ADMINISTRADOR = ({ onLogout, user, view, setView, users, setUsers, selectedUser, setSelectedUser }) => {
 
@@ -11,6 +12,8 @@ const ADMINISTRADOR = ({ onLogout, user, view, setView, users, setUsers, selecte
       // case 'products':
       //   return <Products />;
       // Agrega más casos según sea necesario
+      case "transacciones":
+        return <Store />;
       default:
         return <div><h1>Dashboard</h1></div>; // O un componente Dashboard
     }

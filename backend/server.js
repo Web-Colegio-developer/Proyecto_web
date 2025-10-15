@@ -21,6 +21,7 @@ console.log("Cliente de Google creado.");
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
   res.send('¡El servidor backend está funcionando!');
@@ -335,6 +336,26 @@ app.get('/stores', async (req, res) => {
   }
 });
 
+// GET /stores/:storeId - Obtener info de la tienda
+app.get("/stores/:storeId", async (req, res) => {
+  const { storeId } = req.params;
+  try {
+    const [rows] = await pool.query(
+      "SELECT id_tienda, nombre_tienda, direccion FROM tienda WHERE id_tienda = ?",
+      [storeId]
+    );
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Tienda no encontrada" });
+    }
+    return res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error("Error GET /stores/:storeId", err && (err.stack || err.message || err));
+    return res.status(500).json({ success: false, message: "Error en la BD al obtener tienda", error: err.message });
+  }
+});
+
+
+
 //Endpoint para obtener productos por storeId
 app.get('/stores/:storeId/products', async (req, res) => {
   const { storeId } = req.params;
@@ -478,5 +499,66 @@ app.put('/products/:id', async (req, res) => {
     return res.status(500).json({ success: false, message: 'Error en la BD', error: err.message });
   }
 });
+
+// POST - crear producto (sin imágenes) -- tolerante a diferentes nombres de campo
+// POST - crear producto (tolerante a JSON o multipart/form-data sin archivos)
+app.post("/stores/:storeId/products", upload.none(), async (req, res) => {
+  const { storeId } = req.params;
+
+  console.log("POST /stores/:storeId/products llamado. storeId =", storeId);
+  console.log("Content-Type header:", req.headers['content-type']);
+  // ahora multer.none() habrá llenado req.body con los campos del form-data
+  console.log("Body raw (req.body):", req.body);
+
+  const body = req.body || {};
+
+  // Intentamos leer el nombre del producto desde varias claves posibles
+  const nombre_producto = body.nombre_producto ?? body.nombre ?? body.name ?? body.producto ?? body.productName;
+  const descripcion = body.descripcion ?? body.description ?? body.desc ?? null;
+  const tamaño = body.tamaño ?? body.tamano ?? body.size ?? null;
+  // Si el campo viene como string (form-data) convertir a número más abajo
+  const precioRaw = body.precio ?? body.price ?? null;
+  const precio = (precioRaw === null || precioRaw === undefined || precioRaw === "") ? null : Number(precioRaw);
+  const stockRaw = body.stock ?? body.cantidad ?? body.qty ?? 0;
+  const stock = Number(stockRaw || 0);
+
+  // Validaciones
+  if (!storeId) {
+    return res.status(400).json({ success: false, message: "storeId es requerido en la ruta" });
+  }
+  if (!nombre_producto || String(nombre_producto).trim() === "") {
+    console.warn("Nombre producto ausente. Body keys:", Object.keys(body));
+    return res.status(400).json({ success: false, message: "Falta nombre_producto en el body" });
+  }
+  if (precio === null) {
+    return res.status(400).json({ success: false, message: "Falta precio en el body" });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `INSERT INTO producto (id_tienda, nombre_producto, descripcion, tamaño, precio, stock)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [storeId, nombre_producto, descripcion, tamaño, precio, stock]
+    );
+
+    console.log("Producto insertado id:", result.insertId);
+    return res.json({
+      success: true,
+      data: {
+        id_producto: result.insertId,
+        id_tienda: storeId,
+        nombre_producto,
+        descripcion,
+        tamaño,
+        precio,
+        stock: Number(stock || 0)
+      }
+    });
+  } catch (err) {
+    console.error("ERROR en POST /stores/:storeId/products:", err && (err.stack || err.message || err));
+    return res.status(500).json({ success: false, message: "Error en la BD al crear producto", error: err.message });
+  }
+});
+
 
 

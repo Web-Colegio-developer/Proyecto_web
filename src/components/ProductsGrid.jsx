@@ -1,102 +1,145 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import "./ProductsGrid.css";
 
-// Mock data for products - in a real app this would come from an API
-const mockProducts = [
-  {
-    id: 1,
-    name: "Cuaderno Universitario",
-    description: "Cuaderno de 100 hojas, cuadriculado, ideal para tomar apuntes",
-    price: 8500,
-    image: "/cuaderno.jpg"
-  },
-  {
-    id: 2,
-    name: "Bolígrafo Azul",
-    description: "Bolígrafo de tinta azul, punta fina, escritura suave",
-    price: 2500,
-    image: "/boligrafo.jpg"
-  },
-  {
-    id: 3,
-    name: "Lápiz HB",
-    description: "Lápiz de grafito HB, ideal para dibujo y escritura",
-    price: 1500,
-    image: "/lapiz.jpg"
-  },
-  {
-    id: 4,
-    name: "Borrador",
-    description: "Borrador blanco, no deja residuos, borrado limpio",
-    price: 1200,
-    image: "/borrador.jpg"
-  },
-  {
-    id: 5,
-    name: "Regla 30cm",
-    description: "Regla transparente de 30cm con medidas en centímetros",
-    price: 3000,
-    image: "/regla.jpg"
-  },
-  {
-    id: 6,
-    name: "Resaltador Amarillo",
-    description: "Resaltador fluorescente amarillo, tinta de larga duración",
-    price: 4500,
-    image: "/resaltador.jpg"
-  },
-  {
-    id: 7,
-    name: "Calculadora Básica",
-    description: "Calculadora básica para operaciones matemáticas simples",
-    price: 15000,
-    image: "/calculadora.jpg"
-  },
-  {
-    id: 8,
-    name: "Compás Escolar",
-    description: "Compás para geometría, con lápiz incluido",
-    price: 12000,
-    image: "/compas.jpg"
-  }
-];
+const normalizeApiBase = (base) => {
+  if (!base) return "";
+  return base.endsWith("/") ? base.slice(0, -1) : base;
+};
 
-const ProductsGrid = () => {
-  const [products] = useState(mockProducts);
+const ProductsGrid = ({ apiBase = "", storeId = null, onlyAvailable = true }) => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const safeBase = normalizeApiBase(apiBase);
+    const fetchUrl = storeId
+      ? `${safeBase}/stores/${encodeURIComponent(storeId)}/products`
+      : `${safeBase}/products`;
+
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        console.log("[ProductsGrid] Petición a:", fetchUrl);
+        const res = await fetch(fetchUrl, { signal: controller.signal });
+
+        console.log("[ProductsGrid] status:", res.status, "ok:", res.ok);
+
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "<no response text>");
+          throw new Error(`HTTP ${res.status} - ${txt}`);
+        }
+
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          const txt = await res.text().catch(() => "<no response text>");
+          throw new Error(
+            `Respuesta no es JSON (content-type: ${contentType}). Contenido (truncado): ${txt.slice(0, 500)}`
+          );
+        }
+
+        const json = await res.json();
+        const rows = Array.isArray(json) ? json : (json.data ?? []);
+
+        const normalized = (rows || []).map(r => {
+          // Extraemos raw por si tu backend mete algunos campos ahí
+          const raw = r.raw ?? r;
+
+          const precioRaw = r.precio ?? r.price ?? raw.precio ?? raw.price ?? 0;
+          const precio = typeof precioRaw === "string" ? parseFloat(precioRaw) || 0 : Number(precioRaw || 0);
+
+          // estado puede venir en r.estado o en r.raw.estado
+          const estado = (r.estado ?? raw.estado ?? r.status ?? raw.status ?? "desconocido").toString();
+
+          const fechaCreacion = r.fecha_creacion ?? raw.fecha_creacion ?? r.created_at ?? raw.created_at ?? null;
+
+          return {
+            id_producto: r.id_producto ?? r.id ?? raw.id_producto ?? null,
+            id_tienda: r.id_tienda ?? r.store_id ?? raw.id_tienda ?? null,
+            nombre_producto: r.nombre_producto ?? r.name ?? raw.nombre_producto ?? raw.name ?? null,
+            descripcion: r.descripcion ?? r.description ?? raw.descripcion ?? raw.description ?? null,
+            tamaño: r.tamaño ?? r.tamano ?? r.size ?? raw.tamaño ?? raw.size ?? null,
+            precio,
+            stock: Number(r.stock ?? r.cantidad ?? raw.stock ?? raw.cantidad ?? 0),
+            estado,
+            fecha_creacion: fechaCreacion,
+            imageUrl: r.imageUrl ?? r.image ?? raw.imageUrl ?? raw.image ?? null,
+            raw
+          };
+        });
+
+        const filtered = onlyAvailable
+          ? normalized.filter(p => String(p.estado).toLowerCase() === "disponible")
+          : normalized;
+
+        setProducts(filtered);
+      } catch (err) {
+        if (err && err.name === "AbortError") {
+          console.log("[ProductsGrid] fetch abortado (esperable en StrictMode/dev). Ignorando.");
+          return;
+        }
+
+        console.error("[ProductsGrid] Error al traer productos:", err);
+        setError("No se pudieron cargar los productos desde la API. Revisa la consola para más detalles.");
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+    return () => {
+      controller.abort();
+    };
+  }, [apiBase, storeId, onlyAvailable]);
 
   const handleAddToCart = (product) => {
-    // In a real app, this would add to a cart state or send to backend
-    alert(`¡${product.name} agregado al carrito!`);
+    alert(`¡${product.nombre_producto ?? product.name} agregado al carrito!`);
   };
 
   const handleViewDetails = (product) => {
-    // In a real app, this would navigate to a product detail page
-    alert(`Mostrando detalles de: ${product.name}\n\nPrecio: $${product.price?.toLocaleString("es-CO")}\nDescripción: ${product.description}`);
+    alert(
+      `Mostrando detalles de: ${product.nombre_producto ?? product.name}\n\n` +
+      `Precio: ${new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }).format(product.precio ?? 0)}\n` +
+      `Descripción: ${product.descripcion ?? ""}\n` +
+      `Tamaño: ${product.tamaño ?? ""}\n` +
+      `Stock: ${product.stock ?? 0}\n` +
+      `Estado: ${product.estado ?? "desconocido"}`
+    );
   };
 
   const handleLike = (product) => {
-    // In a real app, this would save to user preferences or backend
-    alert(`¡Te gusta ${product.name}! ❤️`);
+    alert(`¡Te gusta ${product.nombre_producto ?? product.name}! ❤️`);
   };
 
   return (
     <div className="products-container">
       <div className="products-header">
-        <h1>Tienda del Colegio</h1>
-        <p>Encuentra todos los útiles escolares que necesitas</p>
+        <h1>Tienda</h1>
+        <p>Listado de productos</p>
       </div>
-      
+
+      {loading && <div className="products-loading">Cargando productos...</div>}
+      {error && <div className="products-error">{error}</div>}
+
       <div className="products-grid">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onAddToCart={handleAddToCart}
-            onViewDetails={handleViewDetails}
-            onLike={handleLike}
-          />
-        ))}
+        {products.length === 0 && !loading ? (
+          <div className="products-empty">No hay productos para mostrar.</div>
+        ) : (
+          products.map((product) => (
+            <ProductCard
+              key={product.id_producto ?? product.nombre_producto ?? Math.random()}
+              product={product}
+              onAddToCart={handleAddToCart}
+              onViewDetails={handleViewDetails}
+              onLike={handleLike}
+            />
+          ))
+        )}
       </div>
     </div>
   );

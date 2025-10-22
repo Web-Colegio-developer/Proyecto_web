@@ -160,7 +160,7 @@ function App() {
                 }
               />
             ) : (
-              <Route path="/" element={<ProductsGrid />} />
+              <Route path="/" element={<ProductsGrid apiBase="http://localhost:3001" />} />
             )}
             <Route path="/profile" element={<UserProfile user={user} />} />
             <Route path="*" element={<Navigate to={user.role === 'administrador' ? '/administrador' : '/'} />} />

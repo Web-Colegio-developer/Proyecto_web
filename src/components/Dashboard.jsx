@@ -46,7 +46,7 @@ const Dashboard = () => {
 
         setLoading(false)
       } catch (err) {
-        console.error("[v0] Error fetching dashboard data:", err)
+        console.error("Dashboard data:", err)
         setError(err.message)
         setLoading(false)
       }

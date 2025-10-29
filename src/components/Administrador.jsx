@@ -1,12 +1,15 @@
 import "./Administrador.css";
 import Sliderbar from "./Sliderbar";
 import Users from "./Users";
+import Dashboard from "./Dashboard";
 import Store from "./Store";
 
 const ADMINISTRADOR = ({ onLogout, user, view, setView, users, setUsers, selectedUser, setSelectedUser }) => {
 
   const renderView = () => {
     switch (view) {
+      case "dashboard":
+        return <Dashboard />;
       case "usuarios":
         return <Users users={users} setUsers={setUsers} selectedUser={selectedUser} setSelectedUser={setSelectedUser} />;
       // case 'products':

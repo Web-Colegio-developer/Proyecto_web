@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import UserForm from './UserForm';
-import '../styles/users.css';
+import './Users.css';
 
 // Custom hook for debouncing
 const useDebounce = (value, delay) => {
@@ -71,9 +71,9 @@ const Users = ({ users, setUsers, selectedUser, setSelectedUser }) => {
               aria-label={`Ver perfil de ${user.nombres}`}
               role="gridcell"
             >
-              <img src={user.foto} alt={`Avatar de ${user.nombres}`} className="user-avatar" />
-              <p className="user-name">{`${user.nombres || ''} ${user.apellidos || ''}`}</p>
-              <p className="user-role">{(user.rol || '').toUpperCase()}</p>
+              <img src={user.foto} alt={`Avatar de ${user.nombres}`} className="user-avatar_admin" />
+              <p className="user-name_admin">{`${user.nombres || ''} ${user.apellidos || ''}`}</p>
+              <p className="user-role_admin">{(user.rol || '').toUpperCase()}</p>
             </button>
           ))}
         </div>

@@ -167,8 +167,8 @@
 }
 
 .user-avatar {
-  height: 2.5rem; /* 40px */
-  width: 2.5rem; /* 40px */
+  height: 3.5rem; /* 40px */
+  width: 3.5rem; /* 40px */
   border-radius: 9999px;
   /* border: 2px solid #e5e7eb; gray-200 */
   object-fit: cover;

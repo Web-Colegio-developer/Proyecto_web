@@ -9,6 +9,25 @@
     gap: 1.5rem;
     flex: 3;
   }
+  .user-avatar_admin{
+    height: 6rem;
+    width: 6rem;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+  }
+  .user-name_admin{
+    font-weight: 600;
+    font-size: 1rem;
+    color: gray;
+    margin: 0.5rem 0;
+  }
+
+  .user-role_admin {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 0.7rem;
+}
   
   .user-card {
     background-color: #fff;
@@ -57,4 +76,3 @@
     background-color: #f9f9f9;
     border-radius: 8px;
   }
-  

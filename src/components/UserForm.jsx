@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/users.css';
+// import '../styles/users.css';
+import './UserForm.css';
 
 const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
   const [formData, setFormData] = useState(user || {});

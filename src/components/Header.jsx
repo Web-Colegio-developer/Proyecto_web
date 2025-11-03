@@ -1,33 +1,59 @@
-import { useState, useEffect, useRef } from "react";
-import { ShoppingCart, Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
-import "./Header.css";
+import { useState, useEffect, useRef } from "react"
+import { ShoppingCart, Menu, X } from "lucide-react"
+import { Link } from "react-router-dom"
+import "./Header.css"
+
+const getAvatarUrl = (avatarUrl) => {
+  // If no URL provided, use fallback
+  if (!avatarUrl || avatarUrl === "foto") {
+    return "/chip.png"
+  }
+
+  // If it's already a full URL (external link), use it as-is
+  if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {
+    return avatarUrl
+  }
+
+  // If it's a local backend path, prepend the backend URL
+  if (avatarUrl.includes("backend\\uploads") || avatarUrl.includes("backend/uploads")) {
+    // Normalize backslashes to forward slashes
+    const normalizedPath = avatarUrl.replace(/\\/g, "/")
+    // Remove "backend/" prefix and prepend your backend URL
+    const cleanPath = normalizedPath.replace("backend/", "")
+    return `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/${cleanPath}`
+  }
+
+  // For any other case, try to use it as a relative path or fallback
+  return avatarUrl.startsWith("/") ? avatarUrl : "/chip.png"
+}
 
 export const Header = ({ user, onLogout, onBalanceClick }) => {
-  const [isMenuVisible, setIsMenuVisible] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [isMenuVisible, setIsMenuVisible] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const menuRef = useRef(null)
 
   const toggleMenu = () => {
-    setIsMenuVisible(!isMenuVisible);
-  };
+    setIsMenuVisible(!isMenuVisible)
+  }
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+  }
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsMenuVisible(false);
+        setIsMenuVisible(false)
       }
-    };
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
+  const avatarSrc = getAvatarUrl(user.avatarUrl)
 
   return (
     <header className="main-header">
@@ -73,9 +99,10 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
           <div className="avatar-container" ref={menuRef}>
             <button className="avatar-button" onClick={toggleMenu}>
               <img
-                src={user.avatarUrl}
+                src={avatarSrc || "/placeholder.svg"}
                 alt={user.name}
                 className="user-avatar"
+                crossOrigin="anonymous"
               />
             </button>
             {isMenuVisible && (
@@ -121,12 +148,13 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
           {/* Bloque derecho dinámico (Móvil) */}
           <div className="user-section mobile">
             {/* Perfil */}
-            <Link to="/profile" className="avatar-container" style={{ textDecoration: 'none' }}>
+            <Link to="/profile" className="avatar-container" style={{ textDecoration: "none" }}>
               <button className="avatar-button-mobile">
                 <img
-                  src={user.avatarUrl}
+                  src={avatarSrc || "/placeholder.svg"}
                   alt={user.name}
                   className="user-avatar"
+                  crossOrigin="anonymous"
                 />
                 <span>{user.name}</span>
               </button>
@@ -159,7 +187,7 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
         </nav>
       )}
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

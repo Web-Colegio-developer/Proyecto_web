@@ -19,7 +19,7 @@ export const SidebarData = [
     },
     {
         icon: UilClipboardAlt,
-        heading: "Transacciones",
+        heading: "Sus Tiendas",
     },
     {
         icon: UilChart,

@@ -1,360 +1,502 @@
-// src/components/Store.jsx
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import Cards from "./CardsP";
-import defaultImage from "../assets/Imagen_Login.png";
-import "./Store.css";
+import { useEffect, useState } from "react"
+import "./Store.css"
+import {
+  UilEdit,
+  UilTrash,
+  UilPlus,
+  UilTimes,
+  UilBox,
+  UilImage,
+  UilArrowLeft,
+  UilExclamationTriangle,
+} from "@iconscout/react-unicons"
 
-const Store = ({ user }) => {
-  const { storeId: routeStoreId } = useParams();
-  const [storeId, setStoreId] = useState(routeStoreId || null);
-  const [storeInfo, setStoreInfo] = useState(null); // <-- nueva state para nombre/dirección
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const getImageUrl = (imageUrl) => {
+  if (!imageUrl) return null
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl
+  }
+  if (imageUrl.includes("backend\\uploads") || imageUrl.includes("backend/uploads")) {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
+    const cleanPath = imageUrl.replace(/\\/g, "/").replace("backend/", "")
+    return `${backendUrl}/${cleanPath}`
+  }
+  return null
+}
 
-  // Edición
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [editValues, setEditValues] = useState({ nombre_producto: "", precio: 0, tamaño: "", stock: 0 });
+const Store = ({ selectedStore, user, onBack }) => {
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  // Agregar producto (modal)
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ show: false, product: null })
+
+  const [editingProduct, setEditingProduct] = useState(null)
+  const [editValues, setEditValues] = useState({
+    nombre_producto: "",
+    precio: 0,
+    tamaño: "",
+    stock: 0,
+    descripcion: "",
+  })
+
+  const [showAddModal, setShowAddModal] = useState(false)
   const [addForm, setAddForm] = useState({
     nombre_producto: "",
     descripcion: "",
     tamaño: "",
     precio: "",
-    stock: ""
-  });
-  const [addFile, setAddFile] = useState(null);
-  const [addLoading, setAddLoading] = useState(false);
-
-  // fetchProducts
-  const fetchProducts = async (currentStoreId) => {
-    setLoading(true);
-    setError(null);
-    try {
-      let productsRes = await fetch(`http://localhost:3001/stores/${currentStoreId}/products`);
-      if (!productsRes.ok) {
-        productsRes = await fetch(`http://localhost:3001/products?storeId=${currentStoreId}`);
-      }
-      if (!productsRes.ok) {
-        const txt = await productsRes.text().catch(()=>null);
-        throw new Error(`Error al obtener productos: ${productsRes.status} ${txt ?? productsRes.statusText}`);
-      }
-      const json = await productsRes.json();
-      const arr = json.data || json;
-      const normalized = (Array.isArray(arr) ? arr : []).map(p => ({
-        id: p.id_producto ?? p.id ?? p.productId ?? Math.random().toString(36).slice(2,9),
-        title: p.nombre_producto ?? p.name ?? p.title ?? "Producto",
-        category: p.categoria ?? p.category ?? "General",
-        price: Number(p.precio ?? p.price ?? 0),
-        image: p.imageUrl ?? p.image ?? p.imagen ?? defaultImage,
-        badge: p.badge ?? null,
-        rating: p.rating ?? 4.5,
-        raw: p,
-      }));
-      setProducts(normalized);
-    } catch (err) {
-      console.error("fetchProducts error:", err);
-      setError("Error cargando productos.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    stock: "",
+  })
+  const [addLoading, setAddLoading] = useState(false)
 
   useEffect(() => {
-    const init = async () => {
-      let currentStoreId = routeStoreId || storeId;
-      let detectedStoreInfo = null;
+    if (selectedStore?.id_tienda) {
+      fetchProducts(selectedStore.id_tienda)
+    }
+  }, [selectedStore?.id_tienda])
 
-      if (!currentStoreId) {
-        const saved = localStorage.getItem("user");
-        if (!saved) { setError("Usuario no autenticado"); setLoading(false); return; }
-        const userObj = JSON.parse(saved);
-        try {
-          // Obtener tiendas del owner para asignar storeId y storeInfo
-          const storesRes = await fetch(`http://localhost:3001/stores?ownerId=${userObj.id}`);
-          if (!storesRes.ok) {
-            const txt = await storesRes.text().catch(()=>null);
-            throw new Error(`GET /stores no OK: ${storesRes.status} ${txt ?? storesRes.statusText}`);
-          }
-          const storesJson = await storesRes.json();
-          const storesArray = storesJson.data || storesJson;
-          if (Array.isArray(storesArray) && storesArray.length > 0) {
-            const first = storesArray[0];
-            currentStoreId = first.id_tienda || first.id || first.storeId;
-            setStoreId(currentStoreId);
-
-            // Guardamos info disponible (nombre_tienda, direccion) para el header
-            detectedStoreInfo = {
-              id_tienda: first.id_tienda || first.id || currentStoreId,
-              nombre_tienda: first.nombre_tienda ?? first.name ?? first.nombre ?? "Tienda",
-              direccion: first.direccion ?? first.address ?? ""
-            };
-            setStoreInfo(detectedStoreInfo);
-          } else {
-            setError("No hay tiendas");
-            setLoading(false);
-            return;
-          }
-        } catch (err) {
-          console.error("Error obteniendo tiendas:", err);
-          setError("Error al obtener tiendas.");
-          setLoading(false);
-          return;
-        }
-      } else {
-        // Si ya tenemos storeId (p.ej. por ruta), intentamos obtener info vía /stores?ownerId si user es owner,
-        // pero como no hay endpoint GET /stores/:storeId en tu backend actual, mantenemos storeId y fetchProducts.
-        // Opcional: si deseas, podemos intentar buscar en /stores?ownerId del user y elegir la que coincida.
-        // Por ahora, intentamos solo fetchProducts con el storeId existente.
-      }
-
-      await fetchProducts(currentStoreId);
-    };
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeStoreId]);
-
-  // --- DELETE handler ---
-  const handleDelete = async (product) => {
-    const ok = window.confirm(`¿Eliminar "${product.title}"? Esta acción no se puede deshacer.`);
-    if (!ok) return;
+  const fetchProducts = async (storeId) => {
     try {
-      const res = await fetch(`http://localhost:3001/products/${product.id}`, {
-        method: "DELETE",
-      });
-      const json = await res.json();
-      if (res.ok) {
-        // refrescar lista
-        await fetchProducts(storeId);
+      setLoading(true)
+      setError(null)
+      const response = await fetch(`http://localhost:3001/stores/${storeId}/products`)
+      const data = await response.json()
+
+      if (data.success) {
+        setProducts(data.data)
       } else {
-        alert(`No se pudo eliminar: ${json.message || json.error || res.status}`);
+        setError("No se pudieron cargar los productos")
       }
     } catch (err) {
-      console.error(err);
-      alert("Error al eliminar el producto.");
+      console.error("Error fetching products:", err)
+      setError("Error al cargar productos")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
-  // --- EDIT: abrir modal con valores ---
+  const handleDeleteClick = (product) => {
+    setDeleteModal({ show: true, product })
+  }
+
+  const handleDeleteConfirm = async () => {
+    const product = deleteModal.product
+    if (!product) return
+
+    try {
+      const res = await fetch(`http://localhost:3001/products/${product.id_producto}`, {
+        method: "DELETE",
+      })
+      const json = await res.json()
+
+      if (res.ok) {
+        setDeleteModal({ show: false, product: null })
+        await fetchProducts(selectedStore.id_tienda)
+      } else {
+        alert(`No se pudo eliminar: ${json.message || json.error || res.status}`)
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Error al eliminar el producto.")
+    }
+  }
+
   const handleEditOpen = (product) => {
-    setEditingProduct(product);
-    const raw = product.raw || {};
+    setEditingProduct(product)
     setEditValues({
-      nombre_producto: raw.nombre_producto ?? product.title,
-      precio: raw.precio ?? product.price ?? 0,
-      tamaño: raw.tamaño ?? raw.size ?? "",
-      stock: raw.stock ?? 0,
-    });
-  };
+      nombre_producto: product.nombre_producto,
+      precio: product.precio,
+      tamaño: product.tamaño || "",
+      stock: product.stock || 0,
+      descripcion: product.descripcion || "",
+    })
+  }
 
-  // --- EDIT: enviar PUT ---
   const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    if (!editingProduct) return;
+    e.preventDefault()
+    if (!editingProduct) return
+
     try {
       const payload = {
         nombre_producto: editValues.nombre_producto,
         precio: Number(editValues.precio),
         tamaño: editValues.tamaño,
         stock: Number(editValues.stock),
-      };
-      const res = await fetch(`http://localhost:3001/products/${editingProduct.id}`, {
+        descripcion: editValues.descripcion,
+      }
+
+      const res = await fetch(`http://localhost:3001/products/${editingProduct.id_producto}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });
-      const json = await res.json();
+      })
+
+      const json = await res.json()
+
       if (res.ok) {
-        setEditingProduct(null);
-        await fetchProducts(storeId);
+        setEditingProduct(null)
+        await fetchProducts(selectedStore.id_tienda)
       } else {
-        alert(`No se pudo actualizar: ${json.message || json.error || res.status}`);
+        alert(`No se pudo actualizar: ${json.message || json.error || res.status}`)
       }
     } catch (err) {
-      console.error(err);
-      alert("Error al actualizar.");
+      console.error(err)
+      alert("Error al actualizar.")
     }
-  };
+  }
 
-  // --- ADD product handlers (modal form) ---
   const handleAddChange = (e) => {
-    const { name, value } = e.target;
-    setAddForm(prev => ({ ...prev, [name]: value }));
-  };
-  const handleAddFile = (e) => {
-    setAddFile(e.target.files[0] || null);
-  };
+    const { name, value } = e.target
+    setAddForm((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleAddSubmit = async (e) => {
-    e.preventDefault();
-    // validaciones mínimas
+    e.preventDefault()
+
     if (!addForm.nombre_producto || addForm.nombre_producto.trim() === "") {
-      return alert("El nombre del producto es obligatorio.");
+      return alert("El nombre del producto es obligatorio.")
     }
     if (addForm.precio === "" || isNaN(Number(addForm.precio))) {
-      return alert("Precio inválido.");
+      return alert("Precio inválido.")
     }
-    setAddLoading(true);
+
+    setAddLoading(true)
     try {
-      const fd = new FormData();
-      fd.append("nombre_producto", addForm.nombre_producto.trim());
-      fd.append("descripcion", addForm.descripcion?.trim() ?? "");
-      fd.append("tamaño", addForm.tamaño?.trim() ?? "");
-      fd.append("precio", Number(addForm.precio));
-      fd.append("stock", Number(addForm.stock || 0));
-      if (addFile) fd.append("imagen", addFile);
-
-      const res = await fetch(`http://localhost:3001/stores/${storeId}/products`, {
-        method: "POST",
-        body: fd
-      });
-
-      // manejar respuesta no-JSON (evitar error Unexpected token '<')
-      const ct = res.headers.get("content-type") || "";
-      if (!ct.includes("application/json")) {
-        const text = await res.text().catch(()=>null);
-        console.error("RESPUESTA NO JSON:", res.status, text);
-        alert("Error del servidor (revisa consola).");
-        setAddLoading(false);
-        return;
+      const payload = {
+        nombre_producto: addForm.nombre_producto.trim(),
+        descripcion: addForm.descripcion?.trim() || "",
+        tamaño: addForm.tamaño?.trim() || "",
+        precio: Number(addForm.precio),
+        stock: Number(addForm.stock || 0),
       }
 
-      const json = await res.json();
+      const res = await fetch(`http://localhost:3001/stores/${selectedStore.id_tienda}/products`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      const ct = res.headers.get("content-type") || ""
+      if (!ct.includes("application/json")) {
+        const text = await res.text().catch(() => null)
+        console.error("RESPUESTA NO JSON:", res.status, text)
+        alert("Error del servidor (revisa consola).")
+        setAddLoading(false)
+        return
+      }
+
+      const json = await res.json()
+
       if (!res.ok) {
-        console.error("Error crear producto:", json);
-        alert(json.message || json.error || "Error al crear producto");
+        console.error("Error crear producto:", json)
+        alert(json.message || json.error || "Error al crear producto")
       } else {
-        // insertar producto nuevo en estado para feedback
-        const newProduct = {
-          id: json.data.id_producto ?? Math.random().toString(36).slice(2,9),
-          title: json.data.nombre_producto ?? addForm.nombre_producto,
-          category: "General",
-          price: Number(json.data.precio ?? addForm.precio ?? 0),
-          image: json.data.imageUrl ?? defaultImage,
-          raw: json.data
-        };
-        setProducts(prev => [newProduct, ...prev]);
-        setShowAddModal(false);
-        // limpiar form
-        setAddForm({ nombre_producto: "", descripcion: "", tamaño: "", precio: "", stock: "" });
-        setAddFile(null);
+        setShowAddModal(false)
+        setAddForm({ nombre_producto: "", descripcion: "", tamaño: "", precio: "", stock: "" })
+        await fetchProducts(selectedStore.id_tienda)
       }
     } catch (err) {
-      console.error("Error de red al crear producto:", err);
-      alert("Error de red al crear producto.");
+      console.error("Error de red al crear producto:", err)
+      alert("Error de red al crear producto.")
     } finally {
-      setAddLoading(false);
+      setAddLoading(false)
     }
-  };
+  }
+
+  if (loading) {
+    return (
+      <div className="store-wrapper">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Cargando productos...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="store-page">
-      <div className="store-header" style={{ maxWidth: 1200, margin: "0 auto 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <h1>{storeInfo?.nombre_tienda ?? "Tienda"}</h1>
-          <p>{storeInfo ? `📍 ${storeInfo.direccion}` : "Aquí puedes explorar y comprar nuestros productos."}</p>
+    <div className="store-wrapper">
+      <div className="store-hero">
+        <button onClick={onBack} className="back-button">
+          <UilArrowLeft size="20" />
+          Volver a tiendas
+        </button>
+        <div className="store-hero-content">
+          <h1 className="store-hero-title">{selectedStore?.nombre_tienda || "Mi Tienda"}</h1>
+          <p className="store-hero-subtitle">📍 {selectedStore?.direccion || "Gestiona tu inventario"}</p>
         </div>
-        <div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            style={{ padding: "8px 12px", borderRadius: 8, background: "#111827", color: "#fff", border: "none", cursor: "pointer" }}
-          >
-            + Agregar producto
+        <button onClick={() => setShowAddModal(true)} className="hero-add-button">
+          <UilPlus size="22" />
+          Nuevo Producto
+        </button>
+      </div>
+
+      {error && (
+        <div className="error-banner">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {products.length === 0 ? (
+        <div className="empty-container">
+          <div className="empty-icon-wrapper">
+            <UilBox size="80" className="empty-icon" />
+          </div>
+          <h2 className="empty-title">No hay productos aún</h2>
+          <p className="empty-description">Comienza agregando tu primer producto para empezar a vender</p>
+          <button onClick={() => setShowAddModal(true)} className="empty-cta-button">
+            <UilPlus size="20" />
+            Agregar primer producto
           </button>
         </div>
-      </div>
+      ) : (
+        <div className="products-container">
+          <div className="products-header">
+            <h2 className="products-title">Inventario</h2>
+            <span className="products-count">{products.length} productos</span>
+          </div>
+          <div className="products-grid-modern">
+            {products.map((product) => {
+              const imageUrl = getImageUrl(product.imageUrl)
 
-      {loading && <p className="muted" style={{ textAlign: "center" }}>Cargando productos...</p>}
-      {error && <p className="error" style={{ textAlign: "center" }}>{error}</p>}
+              return (
+                <div key={product.id_producto} className="product-card-modern">
+                  <div className="product-image-wrapper">
+                    {imageUrl ? (
+                      <img src={imageUrl || "/placeholder.svg"} alt={product.nombre_producto} className="product-img" />
+                    ) : (
+                      <div className="product-img-placeholder">
+                        <UilImage size="40" />
+                      </div>
+                    )}
+                    <div className="product-overlay">
+                      <button onClick={() => handleEditOpen(product)} className="overlay-btn edit-btn" title="Editar">
+                        <UilEdit size="18" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(product)}
+                        className="overlay-btn delete-btn"
+                        title="Eliminar"
+                      >
+                        <UilTrash size="18" />
+                      </button>
+                    </div>
+                  </div>
 
-      <div className="products-grid" style={{ maxWidth: 1200, margin: "0 auto" }}>
-        {products.map((product) => (
-          <Cards
-            key={product.id}
-            product={{
-              id: product.id,
-              title: product.title,
-              category: product.category,
-              price: product.price,
-              image: product.image,
-              badge: product.badge,
-              rating: product.rating,
-              raw: product.raw
-            }}
-            onFavorite={() => console.log("fav", product.id)}
-            onView={() => console.log("view", product.id)}
-            onAddToCart={() => console.log("add", product.id)}
-            onEditClick={() => handleEditOpen(product)}
-            onDeleteClick={() => handleDelete(product)}
-          />
-        ))}
-      </div>
+                  <div className="product-content">
+                    <h3 className="product-title">{product.nombre_producto}</h3>
+                    {product.descripcion && <p className="product-desc">{product.descripcion}</p>}
 
-      {/* Modal de edición simple */}
+                    <div className="product-meta">
+                      {product.tamaño && (
+                        <div className="meta-item">
+                          <span className="meta-label">Tamaño</span>
+                          <span className="meta-value">{product.tamaño}</span>
+                        </div>
+                      )}
+                      <div className="meta-item">
+                        <span className="meta-label">Stock</span>
+                        <span className="meta-value">{product.stock || 0} unidades</span>
+                      </div>
+                    </div>
+
+                    <div className="product-bottom">
+                      <span className="product-price-modern">${Number(product.precio).toLocaleString()}</span>
+                      <span
+                        className={`stock-indicator ${
+                          product.stock > 10 ? "stock-high" : product.stock > 0 ? "stock-medium" : "stock-low"
+                        }`}
+                      >
+                        {product.stock > 10 ? "✓ Disponible" : product.stock > 0 ? "⚠ Poco stock" : "✕ Agotado"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {deleteModal.show && (
+        <div className="modal-backdrop" onClick={() => setDeleteModal({ show: false, product: null })}>
+          <div className="modal-container delete-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="delete-modal-icon">
+              <UilExclamationTriangle size="48" />
+            </div>
+            <h3 className="delete-modal-title">¿Eliminar producto?</h3>
+            <p className="delete-modal-message">
+              Estás a punto de eliminar <strong>"{deleteModal.product?.nombre_producto}"</strong>. Esta acción no se
+              puede deshacer y el producto será eliminado permanentemente de tu inventario.
+            </p>
+            <div className="delete-modal-footer">
+              <button onClick={handleDeleteConfirm} className="btn-danger">
+                Sí, eliminar
+              </button>
+              <button onClick={() => setDeleteModal({ show: false, product: null })} className="btn-secondary">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {editingProduct && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Editar producto</h3>
-            <form onSubmit={handleEditSubmit}>
-              <label>Nombre</label>
-              <input value={editValues.nombre_producto} onChange={e => setEditValues({...editValues, nombre_producto: e.target.value})} />
-              <label>Precio</label>
-              <input type="number" value={editValues.precio} onChange={e => setEditValues({...editValues, precio: e.target.value})} />
-              <label>Tamaño</label>
-              <input value={editValues.tamaño} onChange={e => setEditValues({...editValues, tamaño: e.target.value})} />
-              <label>Stock</label>
-              <input type="number" value={editValues.stock} onChange={e => setEditValues({...editValues, stock: e.target.value})} />
-              <div style={{ marginTop: 12, display:'flex', gap:8 }}>
-                <button type="submit">Guardar</button>
-                <button type="button" onClick={() => setEditingProduct(null)}>Cancelar</button>
+        <div className="modal-backdrop" onClick={() => setEditingProduct(null)}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-top">
+              <h3 className="modal-heading">Editar Producto</h3>
+              <button onClick={() => setEditingProduct(null)} className="modal-close">
+                <UilTimes size="24" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="modal-body">
+              <div className="input-group">
+                <label className="input-label">Nombre del producto *</label>
+                <input
+                  className="input-field"
+                  value={editValues.nombre_producto}
+                  onChange={(e) => setEditValues({ ...editValues, nombre_producto: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Descripción</label>
+                <textarea
+                  className="input-field textarea-field"
+                  value={editValues.descripcion}
+                  onChange={(e) => setEditValues({ ...editValues, descripcion: e.target.value })}
+                  rows="3"
+                />
+              </div>
+
+              <div className="input-row">
+                <div className="input-group">
+                  <label className="input-label">Precio *</label>
+                  <input
+                    className="input-field"
+                    type="number"
+                    value={editValues.precio}
+                    onChange={(e) => setEditValues({ ...editValues, precio: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Stock</label>
+                  <input
+                    className="input-field"
+                    type="number"
+                    value={editValues.stock}
+                    onChange={(e) => setEditValues({ ...editValues, stock: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Tamaño</label>
+                <input
+                  className="input-field"
+                  value={editValues.tamaño}
+                  onChange={(e) => setEditValues({ ...editValues, tamaño: e.target.value })}
+                  placeholder="Ej: 250ml, Grande, XL"
+                />
+              </div>
+
+              <div className="modal-footer">
+                <button type="submit" className="btn-primary">
+                  Guardar cambios
+                </button>
+                <button type="button" onClick={() => setEditingProduct(null)} className="btn-secondary">
+                  Cancelar
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Modal Agregar Producto */}
       {showAddModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <header style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-              <h3>Agregar producto</h3>
-              <button onClick={() => setShowAddModal(false)} style={{ background:'transparent', border:'none', fontSize:18, cursor:'pointer' }}>✕</button>
-            </header>
+        <div className="modal-backdrop" onClick={() => setShowAddModal(false)}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-top">
+              <h3 className="modal-heading">Agregar Nuevo Producto</h3>
+              <button onClick={() => setShowAddModal(false)} className="modal-close">
+                <UilTimes size="24" />
+              </button>
+            </div>
 
-            <form onSubmit={handleAddSubmit}>
-              <label>Nombre *</label>
-              <input name="nombre_producto" value={addForm.nombre_producto} onChange={handleAddChange} placeholder="Nombre del producto" />
+            <form onSubmit={handleAddSubmit} className="modal-body">
+              <div className="input-group">
+                <label className="input-label">Nombre del producto *</label>
+                <input
+                  className="input-field"
+                  name="nombre_producto"
+                  value={addForm.nombre_producto}
+                  onChange={handleAddChange}
+                  placeholder="Ej: Café Latte"
+                  required
+                />
+              </div>
 
-              <label>Descripción</label>
-              <textarea name="descripcion" value={addForm.descripcion} onChange={handleAddChange} placeholder="Descripción breve" />
+              <div className="input-group">
+                <label className="input-label">Descripción</label>
+                <textarea
+                  className="input-field textarea-field"
+                  name="descripcion"
+                  value={addForm.descripcion}
+                  onChange={handleAddChange}
+                  placeholder="Describe tu producto..."
+                  rows="3"
+                />
+              </div>
 
-              <div style={{ display:'flex', gap:8, marginTop:6 }}>
-                <div style={{ flex:1 }}>
-                  <label>Tamaño</label>
-                  <input name="tamaño" value={addForm.tamaño} onChange={handleAddChange} placeholder="Ej: 250 ml / Grande" />
+              <div className="input-row">
+                <div className="input-group">
+                  <label className="input-label">Precio *</label>
+                  <input
+                    className="input-field"
+                    name="precio"
+                    value={addForm.precio}
+                    onChange={handleAddChange}
+                    type="number"
+                    placeholder="25000"
+                    required
+                  />
                 </div>
-                <div style={{ flex:1 }}>
-                  <label>Precio *</label>
-                  <input name="precio" value={addForm.precio} onChange={handleAddChange} type="number" placeholder="25000" />
-                </div>
-                <div style={{ width:110 }}>
-                  <label>Stock</label>
-                  <input name="stock" value={addForm.stock} onChange={handleAddChange} type="number" placeholder="10" />
+
+                <div className="input-group">
+                  <label className="input-label">Stock inicial</label>
+                  <input
+                    className="input-field"
+                    name="stock"
+                    value={addForm.stock}
+                    onChange={handleAddChange}
+                    type="number"
+                    placeholder="10"
+                  />
                 </div>
               </div>
 
-              <label style={{ marginTop:8 }}>Imagen (opcional)</label>
-              <input type="file" accept="image/*" onChange={handleAddFile} />
+              <div className="input-group">
+                <label className="input-label">Tamaño</label>
+                <input
+                  className="input-field"
+                  name="tamaño"
+                  value={addForm.tamaño}
+                  onChange={handleAddChange}
+                  placeholder="Ej: 250ml, Grande, XL"
+                />
+              </div>
 
-              <div style={{ display:'flex', gap:8, marginTop:12, justifyContent:'flex-end' }}>
-                <button type="submit" disabled={addLoading} style={{ padding:'8px 12px', borderRadius:8, border:'none', cursor:'pointer' }}>
-                  {addLoading ? 'Guardando...' : 'Guardar'}
+              <div className="modal-footer">
+                <button type="submit" disabled={addLoading} className="btn-primary">
+                  {addLoading ? "Guardando..." : "Agregar producto"}
                 </button>
-                <button type="button" onClick={() => setShowAddModal(false)} style={{ padding:'8px 12px', borderRadius:8, border:'none', background:'#f3f4f6', cursor:'pointer' }}>
+                <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary">
                   Cancelar
                 </button>
               </div>
@@ -363,7 +505,7 @@ const Store = ({ user }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Store;
+export default Store

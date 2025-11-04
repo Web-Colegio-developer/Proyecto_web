@@ -24,7 +24,6 @@ const UserStores = ({ user }) => {
       setLoading(true)
       const response = await fetch(`http://localhost:3001/stores?ownerId=${user.id}`)
       const data = await response.json()
-
       if (data.success) {
         setStores(data.data)
       } else {
@@ -46,7 +45,7 @@ const UserStores = ({ user }) => {
     setSelectedStore(null)
   }
 
-  if (loading && stores.length === 0) {
+  if (loading && stores.length === 0 && stores.length === "") {
     return (
       <div className="user-stores-container">
         <div className="loading-state">
@@ -93,8 +92,8 @@ const UserStores = ({ user }) => {
           {stores.length === 0 ? (
             <div className="empty-state">
               <UilStore size="64" className="empty-icon" />
-              <h3>No tienes tiendas aún</h3>
-              <p>Crea tu primera tienda para comenzar a vender</p>
+              <h3>No tienes tiendas asignadas</h3>
+              <p>Contacte con un administrador para que le asigne su tienda</p>
             </div>
           ) : (
             <div className="stores-grid">

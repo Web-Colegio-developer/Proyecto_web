@@ -3,29 +3,31 @@ import { ShoppingCart, Menu, X } from "lucide-react"
 import { Link } from "react-router-dom"
 import "./Header.css"
 
+
+
 const getAvatarUrl = (avatarUrl) => {
-  // If no URL provided, use fallback
+  // Si no hay URL, usa la imagen por defecto
   if (!avatarUrl || avatarUrl === "foto") {
-    return "/chip.png"
+    return "/chip.png";
   }
 
-  // If it's already a full URL (external link), use it as-is
+  // Si ya es una URL completa (externa)
   if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {
-    return avatarUrl
+    return avatarUrl;
   }
 
-  // If it's a local backend path, prepend the backend URL
+  // Si es una ruta local del backend
   if (avatarUrl.includes("backend\\uploads") || avatarUrl.includes("backend/uploads")) {
-    // Normalize backslashes to forward slashes
-    const normalizedPath = avatarUrl.replace(/\\/g, "/")
-    // Remove "backend/" prefix and prepend your backend URL
-    const cleanPath = normalizedPath.replace("backend/", "")
-    return `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/${cleanPath}`
+    const normalizedPath = avatarUrl.replace(/\\/g, "/");
+    const cleanPath = normalizedPath.replace("backend/", "");
+    const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+    return `${backendURL}/${cleanPath}`;
   }
 
-  // For any other case, try to use it as a relative path or fallback
-  return avatarUrl.startsWith("/") ? avatarUrl : "/chip.png"
-}
+  // Caso por defecto
+  return avatarUrl.startsWith("/") ? avatarUrl : "/chip.png";
+};
+
 
 export const Header = ({ user, onLogout, onBalanceClick }) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false)

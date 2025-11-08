@@ -12,6 +12,8 @@
   "dependencies": {
     "@iconscout/react-unicons": "^2.2.5",
     "@react-oauth/google": "^0.12.2",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.541.0",
     "multer": "^2.0.2",
     "react": "^19.1.1",

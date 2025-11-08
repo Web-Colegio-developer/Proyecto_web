@@ -8,6 +8,8 @@ import multer from 'multer';
 import path from "path";
 import { OAuth2Client } from 'google-auth-library';
 import fs from 'fs';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 
 console.log("Dependencias importadas.");
@@ -46,27 +48,54 @@ app.post('/login', async (req, res) => {
   }
 
   try {
+    // 1️⃣ Buscar usuario por correo
     const [rows] = await pool.query(
-      'SELECT u.id, u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ? AND u.passwords = ?',
-      [user, pass]
+      'SELECT u.id, u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, u.passwords, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ?',
+      [user]
     );
 
-    if (rows.length > 0) {
-      const userData = {
-        id: rows[0].id,
-        name: `${rows[0].nombres} ${rows[0].apellidos}`,
-        email: rows[0].correo_electronico,
-        avatarUrl: rows[0].foto,
-        balance: rows[0].saldo,
-        role: rows[0].rol,
-      };
-      res.json({ result: 'Login exitoso', user: userData });
-    } else {
-      res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+    if (rows.length === 0) {
+      return res.status(401).json({ message: 'Usuario no encontrado' });
     }
+
+    const userDB = rows[0];
+
+    // 2️⃣ Verificar contraseña cifrada
+    const isPasswordValid = await bcrypt.compare(pass, userDB.passwords);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Contraseña incorrecta' });
+    }
+
+    // 3️⃣ Crear token JWT
+    const token = jwt.sign(
+      {
+        id: userDB.id,
+        email: userDB.correo_electronico,
+        role: userDB.rol,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    // 4️⃣ Responder con token y datos
+    const userData = {
+      id: userDB.id,
+      name: `${userDB.nombres} ${userDB.apellidos}`,
+      email: userDB.correo_electronico,
+      avatarUrl: userDB.foto,
+      balance: userDB.saldo,
+      role: userDB.rol,
+    };
+
+    res.json({
+      result: 'Login exitoso',
+      user: userData,
+      token: token,
+    });
+
   } catch (error) {
     console.error('Error de inicio de sesión:', error);
-    res.status(500).json({ message: 'Error en la conexión al servidor' });
+    res.status(500).json({ message: 'Error en el servidor' });
   }
 });
 
@@ -285,7 +314,7 @@ app.post("/register", upload.single("foto"), async (req, res) => {
 
     const foto = req.file ? path.join('backend', 'uploads', req.file.filename) : null;
     const rolUsuario = rol?.trim() || "estudiante";
-
+    const hashedPassword = await bcrypt.hash(password.trim(), 10); // Cifrar la contraseña
     await pool.query(
         `INSERT INTO usuarios 
         (nombres, apellidos, correo_electronico, telefono, direccion, fecha_nacimiento, lugar, genero, passwords, foto, rol) 
@@ -299,7 +328,7 @@ app.post("/register", upload.single("foto"), async (req, res) => {
         fechaNacimiento.trim(),
         ciudad.trim(),
         gender.trim(),
-        password.trim(),
+        hashedPassword,
         foto,
         rolUsuario
       ]

@@ -8,7 +8,7 @@ import multer from 'multer';
 import path from "path";
 import { OAuth2Client } from 'google-auth-library';
 import fs from 'fs';
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer"; 
 

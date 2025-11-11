@@ -29,6 +29,11 @@ app.get('/', (req, res) => {
   res.send('¡El servidor backend está funcionando!');
 });
 
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
+});
+
+
 app.get('/test-db', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT 1 + 1 AS ayuda');

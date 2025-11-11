@@ -124,7 +124,6 @@ function App() {
     localStorage.removeItem("user");
     setUser(null);
     navigate('/login');
-    window.location.reload();
   };
 
   const handleSwitchToRegister = () => {
@@ -166,7 +165,7 @@ function App() {
                 }
               />
             ) : (
-              <Route path="/" element={<ProductsGrid apiBase={backendURL|| "http://localhost:3001"} />} />
+              <Route path="/" element={<ProductsGrid apiBase={backendURL} />} />
             )}
             <Route path="/profile" element={<UserProfile user={user} />} />
             <Route path="*" element={<Navigate to={user.role === 'administrador' ? '/administrador' : '/'} />} />

@@ -1,6 +1,6 @@
 import React from "react";
 import "./ProductCard.css";
-import ImagenProducto from "../assets/imagen_producto.png"; // tu imagen estática
+import ImagenProducto from "../assets/Imagen_Producto.png"; // tu imagen estática
 
 /* Íconos SVG inline */
 const IconHeart = ({ size = 16 }) => (

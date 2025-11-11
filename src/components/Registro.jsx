@@ -74,7 +74,7 @@ const REGISTRO = ({ onRegister }) => {
         if (!res.success) {
           toast.error(res.message);
         } else {
-          toast.success("¡Registro exitoso! Redirigiendo al login...");
+          toast.success(" ¡Registro exitoso! Revisa tu correo para activar tu cuenta.");
           setTimeout(() => {
             navigate("/login");
           }, 2000);

@@ -8,8 +8,9 @@ import multer from 'multer';
 import path from "path";
 import { OAuth2Client } from 'google-auth-library';
 import fs from 'fs';
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer"; 
 
 
 console.log("Dependencias importadas.");
@@ -28,11 +29,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.send('¡El servidor backend está funcionando!');
 });
-
-app.get('/healthz', (req, res) => {
-  res.status(200).send('OK');
-});
-
 
 app.get('/test-db', async (req, res) => {
   try {
@@ -53,7 +49,7 @@ app.post('/login', async (req, res) => {
   }
 
   try {
-    // 1️⃣ Buscar usuario por correo
+    //Buscar usuario por correo
     const [rows] = await pool.query(
       'SELECT u.id, u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, u.passwords, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ?',
       [user]
@@ -65,13 +61,13 @@ app.post('/login', async (req, res) => {
 
     const userDB = rows[0];
 
-    // 2️⃣ Verificar contraseña cifrada
+    //Verificar contraseña cifrada
     const isPasswordValid = await bcrypt.compare(pass, userDB.passwords);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
 
-    // 3️⃣ Crear token JWT
+    //Crear token JWT
     const token = jwt.sign(
       {
         id: userDB.id,
@@ -82,14 +78,14 @@ app.post('/login', async (req, res) => {
       { expiresIn: '2h' }
     );
 
-    // 4️⃣ Responder con token y datos
+    //Responder con token y datos
     const userData = {
       id: userDB.id,
       name: `${userDB.nombres} ${userDB.apellidos}`,
       email: userDB.correo_electronico,
       avatarUrl: userDB.foto,
       balance: userDB.saldo,
-      role: userDB.rol,
+      role: userDB.rol, 
     };
 
     res.json({
@@ -294,36 +290,31 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Asegúrate de tener ya importado arriba en tu archivo
+// const jwt = require("jsonwebtoken");
+// const nodemailer = require("nodemailer");
+
 app.post("/register", upload.single("foto"), async (req, res) => {
   try {
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
-
-    // Desestructuramos usando los nombres reales del frontend
     const { nombre, apellido, email, telefono, direccion, fechaNacimiento, ciudad, gender, password, rol } = req.body;
 
-    // Validación segura
-    if (
-      !nombre?.trim() ||
-      !apellido?.trim() ||
-      !email?.trim() ||
-      !telefono?.trim() ||
-      !direccion?.trim() ||
-      !fechaNacimiento?.trim() ||
-      !ciudad?.trim() ||
-      !gender?.trim() ||
-      !password?.trim()
-    ) {
+    // Validación básica
+    if (!nombre?.trim() || !apellido?.trim() || !email?.trim() || !telefono?.trim() || !direccion?.trim() || !fechaNacimiento?.trim() || !ciudad?.trim() || !gender?.trim() || !password?.trim()) {
       return res.status(400).json({ success: false, message: "Faltan campos obligatorios" });
     }
 
+    // Procesar foto
     const foto = req.file ? path.join('backend', 'uploads', req.file.filename) : null;
     const rolUsuario = rol?.trim() || "estudiante";
-    const hashedPassword = await bcrypt.hash(password.trim(), 10); // Cifrar la contraseña
+
+    // Cifrar contraseña
+    const hashedPassword = await bcrypt.hash(password.trim(), 10);
+
+    // Insertar usuario en DB con verified = 0
     await pool.query(
-        `INSERT INTO usuarios 
-        (nombres, apellidos, correo_electronico, telefono, direccion, fecha_nacimiento, lugar, genero, passwords, foto, rol) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO usuarios 
+      (nombres, apellidos, correo_electronico, telefono, direccion, fecha_nacimiento, lugar, genero, passwords, foto, rol, verified) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         nombre.trim(),
         apellido.trim(),
@@ -335,16 +326,86 @@ app.post("/register", upload.single("foto"), async (req, res) => {
         gender.trim(),
         hashedPassword,
         foto,
-        rolUsuario
+        rolUsuario,
+        0 // verified = 0
       ]
     );
 
-    res.json({ success: true, message: "Usuario registrado exitosamente" });
+    // Generar token JWT para verificación
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
+
+    // Configurar transporter de nodemailer
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com", // O tu proveedor SMTP
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Link de verificación
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+
+    // Enviar email
+    await transporter.sendMail({
+      from: `"Tu App" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Verifica tu correo electrónico",
+      html: `
+        <p>Hola ${nombre},</p>
+        <p>Gracias por registrarte. Por favor verifica tu correo haciendo clic en el siguiente botón:</p>
+        <a href="${verificationLink}" style="
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        ">Verificar Correo</a>
+        <p>Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
+        <p>${verificationLink}</p>
+      `,
+    });
+
+    res.json({ success: true, message: "Usuario registrado exitosamente. Revisa tu correo para verificar la cuenta." });
+
   } catch (error) {
     console.error("Error en backend:", error);
     res.status(500).json({ success: false, message: "Error en la conexión al servidor" });
   }
 });
+
+app.post("/verify-email", async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ success: false, message: "Token no enviado" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const email = decoded.email;
+
+    // Activar usuario en la base de datos
+    const result = await pool.query("UPDATE usuarios SET verified = 1 WHERE correo_electronico = ?", [email]);
+
+    if (result[0].affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Usuario no encontrado o ya verificado" });
+    }
+
+    res.json({ success: true, message: "Correo verificado correctamente" });
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ success: false, message: "El token ha expirado" });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(400).json({ success: false, message: "Token inválido" });
+    }
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error en el servidor" });
+  }
+});
+
 
 console.log("Preparando para escuchar en el puerto", port);
 app.listen(port, () => {

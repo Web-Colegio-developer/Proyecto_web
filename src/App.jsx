@@ -9,6 +9,7 @@ import UserProfile from './components/UserProfile';
 import Tarjeta from './components/tarjeta';
 import Administrador from './components/Administrador';
 import ProductsGrid from './components/ProductsGrid';
+import VerifyEmail from './components/VerifyEmail';
 
 const backendURL = import.meta.env.VITE_BACKEND_URL 
                    || (window.location.hostname === "localhost" 
@@ -175,6 +176,7 @@ function App() {
           <>
             <Route path="/login" element={<LoginForm onLogin={handleLogin} onGoogleLogin={handleGoogleLogin} onSwitchToRegister={handleSwitchToRegister} />} />
             <Route path="/register" element={<Registro onRegister={handleLogin} onSwitchToLogin={handleSwitchToLogin} />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </>)}
       </Routes>

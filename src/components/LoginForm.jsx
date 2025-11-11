@@ -4,6 +4,11 @@ import "./LoginForm.css";
 import { Link } from "react-router-dom";
 import { GoogleLogin } from '@react-oauth/google';
 
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://proyecto-web-gufr.onrender.com"
+    : "http://localhost:3001";
+
 
 function LoginForm({ onLogin, onGoogleLogin, onSwitchToRegister }) {
   const [user, setUser] = useState("");
@@ -37,7 +42,7 @@ function LoginForm({ onLogin, onGoogleLogin, onSwitchToRegister }) {
 
     const data = { user, pass };
 
-    fetch("http://localhost:3001/login", {
+    fetch(`${API_URL}/login`, {
       method: "POST",
       headers: headers,
       body: JSON.stringify(data),

@@ -123,6 +123,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
+    setMostrarTarjeta(false);
     navigate('/login', { replace: true });
   };
 

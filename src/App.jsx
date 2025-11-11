@@ -166,7 +166,7 @@ function App() {
                 }
               />
             ) : (
-              <Route path="/" element={<ProductsGrid apiBase={import.meta.env.VITE_BACKEND_URL_2 || "http://localhost:3001"} />} />
+              <Route path="/" element={<ProductsGrid apiBase={backendURL|| "http://localhost:3001"} />} />
             )}
             <Route path="/profile" element={<UserProfile user={user} />} />
             <Route path="*" element={<Navigate to={user.role === 'administrador' ? '/administrador' : '/'} />} />

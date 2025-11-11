@@ -5,6 +5,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const getBackendURL = () => {
+  const envURL = import.meta.env.VITE_BACKEND_URL;
+  if (envURL) return envURL;
+  if (window.location.hostname === "localhost") return "http://localhost:3001";
+  return "https://proyecto-web-gufr.onrender.com";
+};
+
 const REGISTRO = ({ onRegister }) => {
   const [preview, setPreview] = useState(null);
   const navigate = useNavigate();
@@ -58,7 +65,7 @@ const REGISTRO = ({ onRegister }) => {
     formData.append("rol", "estudiante"); // por default
     formData.append("foto", document.getElementById("foto").files[0]);
 
-    fetch("http://localhost:3001/register", {
+    fetch(`${getBackendURL()}/register`, {
       method: "POST",
       body: formData,
     })

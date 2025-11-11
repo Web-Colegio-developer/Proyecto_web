@@ -12,19 +12,38 @@ import {
 } from "@iconscout/react-unicons"
 
 const getImageUrl = (imageUrl) => {
-  if (!imageUrl) return null
+  if (!imageUrl) return null;
+
+  // Si ya es una URL completa, retornar tal cual
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-    return imageUrl
+    return imageUrl;
   }
+
+  // Si es una ruta local del backend
   if (imageUrl.includes("backend\\uploads") || imageUrl.includes("backend/uploads")) {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
-    const cleanPath = imageUrl.replace(/\\/g, "/").replace("backend/", "")
-    return `${backendUrl}/${cleanPath}`
+    // Determinar backend URL según entorno
+    const backendURL = import.meta.env.VITE_BACKEND_URL 
+                        || (window.location.hostname === "localhost" 
+                            ? "http://localhost:3001" 
+                            : "https://proyecto-web-gufr.onrender.com");
+
+    // Normalizar la ruta
+    const cleanPath = imageUrl.replace(/\\/g, "/").replace("backend/", "");
+    return `${backendURL}/${cleanPath}`;
   }
-  return null
-}
+
+  return null;
+};
+
 
 const Store = ({ selectedStore, user, onBack }) => {
+
+  const backendURL = import.meta.env.VITE_BACKEND_URL 
+                      || (window.location.hostname === "localhost" 
+                          ? "http://localhost:3001" 
+                          : "https://proyecto-web-gufr.onrender.com");
+
+
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -60,7 +79,7 @@ const Store = ({ selectedStore, user, onBack }) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch(`http://localhost:3001/stores/${storeId}/products`)
+      const response = await fetch(`${backendURL}/stores/${storeId}/products`)
       const data = await response.json()
 
       if (data.success) {
@@ -85,7 +104,7 @@ const Store = ({ selectedStore, user, onBack }) => {
     if (!product) return
 
     try {
-      const res = await fetch(`http://localhost:3001/products/${product.id_producto}`, {
+      const res = await fetch(`${backendURL}/products/${product.id_producto}`, {
         method: "DELETE",
       })
       const json = await res.json()
@@ -126,7 +145,7 @@ const Store = ({ selectedStore, user, onBack }) => {
         descripcion: editValues.descripcion,
       }
 
-      const res = await fetch(`http://localhost:3001/products/${editingProduct.id_producto}`, {
+      const res = await fetch(`${backendURL}/products/${editingProduct.id_producto}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -171,7 +190,7 @@ const Store = ({ selectedStore, user, onBack }) => {
         stock: Number(addForm.stock || 0),
       }
 
-      const res = await fetch(`http://localhost:3001/stores/${selectedStore.id_tienda}/products`, {
+      const res = await fetch(`${backendURL}/stores/${selectedStore.id_tienda}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

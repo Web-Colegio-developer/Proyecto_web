@@ -3,6 +3,14 @@ import "./UserStores.css"
 import { UilStore } from "@iconscout/react-unicons"
 import Store from "./Store"
 
+
+
+const backendURL = import.meta.env.VITE_BACKEND_URL 
+                   || (window.location.hostname === "localhost" 
+                       ? "http://localhost:3001" 
+                       : "https://proyecto-web-gufr.onrender.com");
+
+
 const UserStores = ({ user }) => {
   const [stores, setStores] = useState([])
   const [selectedStore, setSelectedStore] = useState(null)
@@ -22,7 +30,7 @@ const UserStores = ({ user }) => {
 
     try {
       setLoading(true)
-      const response = await fetch(`http://localhost:3001/stores?ownerId=${user.id}`)
+      const response = await fetch(`${backendURL}/stores?ownerId=${user.id}`)
       const data = await response.json()
       if (data.success) {
         setStores(data.data)

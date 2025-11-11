@@ -10,6 +10,12 @@ import Tarjeta from './components/tarjeta';
 import Administrador from './components/Administrador';
 import ProductsGrid from './components/ProductsGrid';
 
+const backendURL = import.meta.env.VITE_BACKEND_URL 
+                   || (window.location.hostname === "localhost" 
+                       ? "http://localhost:3001" 
+                       : "https://proyecto-web-gufr.onrender.com");
+
+
 function App() {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]); // State for all users
@@ -40,7 +46,7 @@ function App() {
     const fetchUserBalance = async () => {
       if (user && user.id) { // Use user.id instead of user.email
         try {
-          const response = await fetch(`http://localhost:3001/users/${user.id}`); // Use /users/:id endpoint
+          const response = await fetch(`${backendURL}/users/${user.id}`); // Use /users/:id endpoint
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.data) {
@@ -70,7 +76,7 @@ function App() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:3001/users');
+      const response = await fetch(`${backendURL}/users`);
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
@@ -94,7 +100,7 @@ function App() {
   };
 
   const handleGoogleLogin = (credentialResponse) => {
-    fetch("http://localhost:3001/auth/google", {
+    fetch(`${backendURL}/auth/google`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -160,7 +166,7 @@ function App() {
                 }
               />
             ) : (
-              <Route path="/" element={<ProductsGrid apiBase="http://localhost:3001" />} />
+              <Route path="/" element={<ProductsGrid apiBase={import.meta.env.VITE_BACKEND_URL_2 || "http://localhost:3001"} />} />
             )}
             <Route path="/profile" element={<UserProfile user={user} />} />
             <Route path="*" element={<Navigate to={user.role === 'administrador' ? '/administrador' : '/'} />} />

@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 // import '../styles/users.css';
 import './UserForm.css';
 
+
+const backendURL = import.meta.env.VITE_BACKEND_URL 
+                   || (window.location.hostname === "localhost" 
+                       ? "http://localhost:3001" 
+                       : "https://proyecto-web-gufr.onrender.com");
+
 const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
   const [formData, setFormData] = useState(user || {});
 
@@ -30,7 +36,7 @@ const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
     }
     
     try {
-      const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+      const response = await fetch(`${backendURL}/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +58,7 @@ const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
   const handleDelete = async () => {
     if (window.confirm('¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.')) {
       try {
-        const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+        const response = await fetch(`${backendURL}/users/${user.id}`, {
           method: 'DELETE',
         });
 

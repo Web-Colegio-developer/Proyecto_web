@@ -20,7 +20,7 @@ const getAvatarUrl = (avatarUrl) => {
   if (avatarUrl.includes("backend\\uploads") || avatarUrl.includes("backend/uploads")) {
     const normalizedPath = avatarUrl.replace(/\\/g, "/");
     const cleanPath = normalizedPath.replace("backend/", "");
-    const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+    const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001" ||"https://proyecto-web-gufr.onrender.com";
     return `${backendURL}/${cleanPath}`;
   }
 

@@ -24,23 +24,27 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const backendUrl = window.location.hostname.includes("netlify.app")
+  ? "https://proyecto-web-gufr.onrender.com"
+  : "http://localhost:3001"
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
 
         // Fetch users
-        const usersResponse = await fetch("http://localhost:3001/users")
+        const usersResponse = await fetch(`${backendUrl}/users`)
         const usersData = await usersResponse.json()
         setUsers(usersData)
 
         // Fetch stores - you can add ownerId query param if needed
-        const storesResponse = await fetch("http://localhost:3001/stores?ownerId=1")
+        const storesResponse = await fetch(`${backendUrl}/stores?ownerId=1`)
         const storesResult = await storesResponse.json()
         setStores(storesResult.success ? storesResult.data : [])
 
         // Fetch products
-        const productsResponse = await fetch("http://localhost:3001/products")
+        const productsResponse = await fetch(`${backendUrl}/products`)
         const productsResult = await productsResponse.json()
         setProducts(productsResult.success ? productsResult.data : [])
 

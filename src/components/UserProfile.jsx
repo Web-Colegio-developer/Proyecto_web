@@ -4,6 +4,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import './UserProfile.css';
 
 
+const backendURL = import.meta.env.VITE_BACKEND_URL 
+                   || (window.location.hostname === "localhost" 
+                       ? "http://localhost:3001" 
+                       : "https://proyecto-web-gufr.onrender.com");
+
 export default function PerfilUsuario({ user }) {
   const [formData, setFormData] = useState(null);
   const [editedData, setEditedData] = useState(null);
@@ -19,7 +24,7 @@ export default function PerfilUsuario({ user }) {
       }
 
       try {
-        const response = await fetch(`http://localhost:3001/users/${user.id}`);
+        const response = await fetch(`${backendURL}/users/${user.id}`);
         if (!response.ok) {
           throw new Error('Error al obtener los datos del perfil');
         }
@@ -73,7 +78,7 @@ export default function PerfilUsuario({ user }) {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+      const response = await fetch(`${backendURL}/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

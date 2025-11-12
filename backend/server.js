@@ -407,7 +407,7 @@ app.post("/verify-email", async (req, res) => {
 });
 
 
-console.log("Preparando para escuchar en el puerto", port);
+console.log("Preparando para escuchar en el puerto",PORT);
 app.listen(PORT, () => {
   console.log(`Servidor listo en el puerto ${PORT}`);
 });

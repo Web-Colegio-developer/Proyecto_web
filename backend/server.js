@@ -16,7 +16,7 @@ import nodemailer from "nodemailer";
 console.log("Dependencias importadas.");
 
 const app = express();
-const port = 3001;
+const PORT = process.env.PORT || 3001;
 
 console.log("Creando cliente de Google...");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -408,8 +408,8 @@ app.post("/verify-email", async (req, res) => {
 
 
 console.log("Preparando para escuchar en el puerto", port);
-app.listen(port, () => {
-  console.log(`El servidor se está ejecutando en http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Servidor listo en el puerto ${PORT}`);
 });
 
 //Endpoints para tiendas y productos

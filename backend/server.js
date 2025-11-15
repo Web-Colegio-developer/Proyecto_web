@@ -3,7 +3,8 @@ console.log("Iniciando servidor...");
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import pool from './db.js';
+import {pool,cloudinary} from './db.js';
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from 'multer';
 import path from "path";
 import { OAuth2Client } from 'google-auth-library';
@@ -12,6 +13,27 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer"; 
 
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "perfiles",    
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
+  },
+});
+
+const upload = multer({ storage: storage });
+
+
+// Configuración de almacenamiento
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, path.join(process.cwd(), "uploads")); // 👈 más fácil
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, Date.now() + "-" + file.originalname);
+//   },
+// });
 
 console.log("Dependencias importadas.");
 
@@ -29,6 +51,36 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.send('¡El servidor backend está funcionando!');
 });
+
+app.post("/upload-image", upload.single("foto"), async (req, res) => {
+  try {
+    const imageUrl = req.file.path; 
+    
+    res.json({
+      success: true,
+      url: imageUrl,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Error al subir imagen" });
+  }
+});
+
+app.get("/test-cloudinary", async (req, res) => {
+  try {
+    const result = await cloudinary.api.ping();
+    res.json({
+      message: "Conectado a Cloudinary ✔",
+      cloudinary_status: result.status
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "NO conectado ❌",
+      error: error.message
+    });
+  }
+});
+
 
 app.get('/test-db', async (req, res) => {
   try {
@@ -278,17 +330,6 @@ app.get('/users', async (req, res) => {
   }
 });
 
-// Configuración de almacenamiento
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(process.cwd(), "uploads")); // 👈 más fácil
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
-const upload = multer({ storage });
 
 // Asegúrate de tener ya importado arriba en tu archivo
 // const jwt = require("jsonwebtoken");
@@ -304,7 +345,7 @@ app.post("/register", upload.single("foto"), async (req, res) => {
     }
 
     // Procesar foto
-    const foto = req.file ? path.join('backend', 'uploads', req.file.filename) : null;
+    const foto = req.body.foto
     const rolUsuario = rol?.trim() || "estudiante";
 
     // Cifrar contraseña
@@ -654,6 +695,7 @@ app.post("/stores/:storeId/products", upload.none(), async (req, res) => {
     return res.status(500).json({ success: false, message: "Error en la BD al crear producto", error: err.message });
   }
 });
+
 
 
 

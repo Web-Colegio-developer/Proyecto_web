@@ -2,8 +2,8 @@ import { useState } from "react";
 import COVER_IMAGE from "../assets/Imagen_Login.png";
 import "./Registro.css";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const getBackendURL = () => {
   const envURL = import.meta.env.VITE_BACKEND_URL;
@@ -12,7 +12,7 @@ const getBackendURL = () => {
   return "https://proyecto-web-gufr.onrender.com";
 };
 
-const REGISTRO = ({onRegister}) => {
+const REGISTRO = ({ onRegister }) => {
   const [preview, setPreview] = useState(null);
   const navigate = useNavigate();
 
@@ -29,19 +29,45 @@ const REGISTRO = ({onRegister}) => {
   // Opciones tipo chip
   const [gender, setGender] = useState("");
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     if (e.target.files.length > 0) {
       const file = e.target.files[0];
       setPreview(URL.createObjectURL(file));
+      // const formData = new FormData();
+      //   formData.append("foto", file);try {
+      //   const res = await fetch("http://localhost:3001/upload-image", {
+      //     method: "POST",
+      //     body: formData,
+      //   });
+
+      //   const data = await res.json();
+      //   if (data.success) {
+      //     console.log("Imagen subida correctamente:", data.url);
+      //     // Aquí puedes guardar la URL en tu estado o en tu base de datos
+      //   } else {
+      //     console.error("Error al subir la imagen:", data.error);
+      //   }
+      // } catch (err) {
+      //   console.error("Error al conectar con el backend:", err);
+      // }
     } else {
       setPreview(null);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!nombre || !apellido || !email || !telefono || !direccion || !fechaNacimiento || !ciudad || !password) {
+    if (
+      !nombre ||
+      !apellido ||
+      !email ||
+      !telefono ||
+      !direccion ||
+      !fechaNacimiento ||
+      !ciudad ||
+      !password
+    ) {
       toast.error("Por favor complete todos los campos.");
       return;
     }
@@ -53,6 +79,7 @@ const REGISTRO = ({onRegister}) => {
 
     // Crear FormData
     const formData = new FormData();
+    const formDataimg = new FormData();
     formData.append("nombre", nombre);
     formData.append("apellido", apellido);
     formData.append("email", email);
@@ -63,7 +90,22 @@ const REGISTRO = ({onRegister}) => {
     formData.append("gender", gender);
     formData.append("password", password);
     formData.append("rol", "estudiante"); // por default
-    formData.append("foto", document.getElementById("foto").files[0]);
+    formDataimg.append("foto", document.getElementById("foto").files[0]);
+
+    try {
+      const res = await fetch("http://localhost:3001/upload-image", {
+        method: "POST",
+        body: formDataimg,
+      });
+      const data = await res.json();
+      if (data.success) {
+        formData.append("foto", data.url);
+      } else {
+        console.error("Error al subir la imagen:", data.error);
+      }
+    } catch (err) {
+      console.error("Error al conectar con el backend:", err);
+    }
 
     fetch(`${getBackendURL()}/register`, {
       method: "POST",
@@ -74,7 +116,9 @@ const REGISTRO = ({onRegister}) => {
         if (!res.success) {
           toast.error(res.message);
         } else {
-          toast.success(" ¡Registro exitoso! Revisa tu correo para activar tu cuenta.");
+          toast.success(
+            " ¡Registro exitoso! Revisa tu correo para activar tu cuenta."
+          );
           setTimeout(() => {
             navigate("/login");
           }, 2000);
@@ -97,7 +141,12 @@ const REGISTRO = ({onRegister}) => {
             {/* Foto */}
             <div className="reg-field reg-field--full">
               <label htmlFor="foto">Foto de Perfil</label>
-              <input type="file" id="foto" accept="image/*" onChange={handleImageChange} />
+              <input
+                type="file"
+                id="foto"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
             </div>
 
             {/* Foto Preview */}
@@ -110,39 +159,81 @@ const REGISTRO = ({onRegister}) => {
 
             {/* Nombre y Apellido */}
             <div className="reg-field">
-              <input type="text" placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+              <input
+                type="text"
+                placeholder="Nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+              />
             </div>
 
             <div className="reg-field">
-              <input type="text" placeholder="Apellido" value={apellido} onChange={(e) => setApellido(e.target.value)} />
+              <input
+                type="text"
+                placeholder="Apellido"
+                value={apellido}
+                onChange={(e) => setApellido(e.target.value)}
+              />
             </div>
 
             {/* Correo y Teléfono */}
             <div className="reg-field">
-              <input type="email" placeholder="Correo" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <input
+                type="email"
+                placeholder="Correo"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
 
             <div className="reg-field">
-              <input type="text" placeholder="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value.replace(/[^0-9]/g, ''))} />
+              <input
+                type="text"
+                placeholder="Teléfono"
+                value={telefono}
+                onChange={(e) =>
+                  setTelefono(e.target.value.replace(/[^0-9]/g, ""))
+                }
+              />
             </div>
 
             {/* Dirección y Fecha */}
             <div className="reg-field">
-              <input type="text" placeholder="Dirección" value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+              <input
+                type="text"
+                placeholder="Dirección"
+                value={direccion}
+                onChange={(e) => setDireccion(e.target.value)}
+              />
             </div>
 
             <div className="reg-field">
-              <input type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
+              <input
+                type="date"
+                value={fechaNacimiento}
+                onChange={(e) => setFechaNacimiento(e.target.value)}
+              />
             </div>
 
             {/* Ciudad y Género */}
             <div className="reg-field">
-              <input type="text" placeholder="Ciudad" value={ciudad} onChange={(e) => setCiudad(e.target.value)} />
+              <input
+                type="text"
+                placeholder="Ciudad"
+                value={ciudad}
+                onChange={(e) => setCiudad(e.target.value)}
+              />
             </div>
 
             <div className="reg-field">
-              <select value={gender} onChange={(e) => setGender(e.target.value)} className="reg-input">
-                <option value="" disabled>Seleccione su género</option>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="reg-input"
+              >
+                <option value="" disabled>
+                  Seleccione su género
+                </option>
                 <option value="Masculino">Masculino</option>
                 <option value="Femenino">Femenino</option>
               </select>
@@ -150,7 +241,12 @@ const REGISTRO = ({onRegister}) => {
 
             {/* Contraseña */}
             <div className="reg-field reg-field--full">
-              <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <input
+                type="password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
           </div>
 
@@ -159,13 +255,19 @@ const REGISTRO = ({onRegister}) => {
               <label className="reg-agree">
                 <input type="checkbox" /> Acepta Términos y Condiciones
               </label>
-              <a className="reg-forgot" href="#">¿Olvidó su Contraseña?</a>
+              <a className="reg-forgot" href="#">
+                ¿Olvidó su Contraseña?
+              </a>
             </div>
 
-            <button type="submit" className="reg-btn reg-btn--primary">Registrar</button>
+            <button type="submit" className="reg-btn reg-btn--primary">
+              Registrar
+            </button>
 
             <div className="reg-login-link">
-              <p>¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link></p>
+              <p>
+                ¿Ya tienes cuenta? <Link to="/login">Inicia Sesión</Link>
+              </p>
             </div>
           </div>
         </form>

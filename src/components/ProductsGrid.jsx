@@ -49,7 +49,7 @@ const ProductsGrid = ({ apiBase = '', storeId = null, onlyAvailable = true }) =>
           const raw = r.raw ?? r
           const precioRaw = r.precio ?? r.price ?? raw.precio ?? raw.price ?? 0
           const precio = typeof precioRaw === 'string' ? parseFloat(precioRaw) || 0 : Number(precioRaw || 0)
-          const estado = (r.estado ?? raw.estado ?? r.status ?? raw.status ?? 'desconocido').toString()
+          // const estado = (r.estado ?? raw.estado ?? r.status ?? raw.status ?? 'desconocido').toString()
           const fechaCreacion = r.fecha_creacion ?? raw.fecha_creacion ?? r.created_at ?? raw.created_at ?? null
 
           return {
@@ -60,15 +60,16 @@ const ProductsGrid = ({ apiBase = '', storeId = null, onlyAvailable = true }) =>
             tamaño: r.tamaño ?? r.tamano ?? r.size ?? raw.tamaño ?? raw.size ?? null,
             precio,
             stock: Number(r.stock ?? r.cantidad ?? raw.stock ?? raw.cantidad ?? 0),
-            estado,
+            // estado,
             fecha_creacion: fechaCreacion,
             imageUrl: r.imageUrl ?? r.image ?? raw.imageUrl ?? raw.image ?? null,
+            id_categoria: r.id_categoria ?? r.category_id ?? raw.id_categoria ?? null,
             raw
           }
         })
 
         const filtered = onlyAvailable
-          ? normalized.filter(p => String(p.estado).toLowerCase() === 'disponible')
+          ? normalized.filter(p => Number(p.stock ?? 0) > 0)
           : normalized
 
         setProducts(filtered)

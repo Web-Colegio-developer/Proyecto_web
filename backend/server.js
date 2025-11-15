@@ -537,13 +537,13 @@ app.get('/products', async (req, res) => {
       const imageUrl = filename ? `${req.protocol}://${req.get('host')}/uploads/${filename}` : null;
 
       return {
-        id_producto: r.id_producto ?? r.id ?? r.productId ?? null,
-        id_tienda: r.id_tienda ?? r.store_id ?? null,
-        nombre_producto: r.nombre_producto ?? r.name ?? r.title ?? null,
-        descripcion: r.descripcion ?? r.description ?? null,
-        tamaño: r.tamaño ?? r.tamano ?? r.size ?? null,
-        precio: r.precio ?? r.price ?? 0,
-        stock: r.stock ?? r.cantidad ?? 0,
+        id_producto: r.id_producto ?? null,
+        id_tienda: r.id_tienda ?? null,
+        nombre_producto: r.nombre_producto ?? null,
+        descripcion: r.descripcion ?? null,
+        tamaño: r.tamaño ?? null,
+        precio: r.precio ?? 0,
+        stock: r.stock ?? 0,
         raw: r,
         imageUrl
       };

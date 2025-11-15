@@ -22,6 +22,10 @@ export const SidebarData = [
         heading: "Sus Tiendas",
     },
     {
+        icon: UilClipboardAlt,
+        heading: "Crear tiendas",
+    },
+    {
         icon: UilChart,
         heading: "Reportes",
     },

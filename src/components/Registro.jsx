@@ -33,23 +33,6 @@ const REGISTRO = ({ onRegister }) => {
     if (e.target.files.length > 0) {
       const file = e.target.files[0];
       setPreview(URL.createObjectURL(file));
-      // const formData = new FormData();
-      //   formData.append("foto", file);try {
-      //   const res = await fetch("http://localhost:3001/upload-image", {
-      //     method: "POST",
-      //     body: formData,
-      //   });
-
-      //   const data = await res.json();
-      //   if (data.success) {
-      //     console.log("Imagen subida correctamente:", data.url);
-      //     // Aquí puedes guardar la URL en tu estado o en tu base de datos
-      //   } else {
-      //     console.error("Error al subir la imagen:", data.error);
-      //   }
-      // } catch (err) {
-      //   console.error("Error al conectar con el backend:", err);
-      // }
     } else {
       setPreview(null);
     }
@@ -94,7 +77,7 @@ const REGISTRO = ({ onRegister }) => {
     const tipo = "perfil";
 
     try {
-      const res = await fetch(`http://localhost:3001/upload-image?tipo=${tipo}`, {
+      const res = await fetch(`${getBackendURL()}/upload-image?tipo=${tipo}`, {
         method: "POST",
         body: formDataimg,
       });

@@ -12,7 +12,7 @@ const getBackendURL = () => {
   return "https://proyecto-web-gufr.onrender.com";
 };
 
-const REGISTRO = ({ onRegister }) => {
+const REGISTRO = ({onRegister}) => {
   const [preview, setPreview] = useState(null);
   const navigate = useNavigate();
 

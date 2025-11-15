@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { ShoppingCart, Menu, X } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useCart } from "../context/CartContext"
 import "./Header.css"
 
 
@@ -29,11 +30,14 @@ const getAvatarUrl = (avatarUrl) => {
 };
 
 
+
 export const Header = ({ user, onLogout, onBalanceClick }) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const menuRef = useRef(null)
+  const { toggleCart } = useCart()
 
+  // console.log('BORRAR LOGOUT:', onLogout);
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible)
   }
@@ -71,13 +75,16 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
         <nav className="header-nav">
           <ul>
             <li>
-              <a href="#">Inicio</a>
+              <Link to="/">Inicio</Link>
+              {/* <a href="#">Inicio</a> */}
             </li>
             <li>
-              <a href="/about">Sobre nosotros</a>
+              <Link to="/about">Sobre nosotros</Link>
+              {/* <a href="/about">Sobre nosotros</a> */}
             </li>
             <li>
-              <a href="/contact">Contacto</a>
+              <Link to="/contact">Contacto</Link>
+              {/* <a href="/contact">Contacto</a> */}
             </li>
           </ul>
         </nav>
@@ -93,7 +100,7 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
           </button>
 
           {/* Carrito */}
-          <button className="cart-button">
+          <button className="cart-button" onClick={toggleCart}>
             <ShoppingCart size={26} />
           </button>
 
@@ -141,10 +148,12 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
               <a href="#">Inicio</a>
             </li>
             <li>
-              <a href="/about">Sobre nosotros</a>
+              <Link to="/about">Sobre nosotros</Link>
+              {/* <a href="/about">Sobre nosotros</a> */}
             </li>
             <li>
-              <a href="/contact">Contacto</a>
+              <Link to="/contact">Contacto</Link>
+              {/* <a href="/contact">Contacto</a> */}
             </li>
           </ul>
           {/* Bloque derecho dinámico (Móvil) */}
@@ -177,7 +186,7 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
             </button>
 
             {/* Carrito */}
-            <button className="cart-button">
+            <button className="cart-button" onClick={toggleCart}>
               <ShoppingCart size={20} />
               <span>Carrito</span>
             </button>

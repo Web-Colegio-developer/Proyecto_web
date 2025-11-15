@@ -1,28 +1,32 @@
-import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import './App.css';
-import './styles/users.css'; // Import styles
-import LoginForm from './components/LoginForm';
-import Registro from './components/Registro';
-import Header from './components/Header';
-import UserProfile from './components/UserProfile';
-import Tarjeta from './components/tarjeta';
-import Administrador from './components/Administrador';
-import ProductsGrid from './components/ProductsGrid';
-import VerifyEmail from './components/VerifyEmail';
+import { useState, useEffect } from "react";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import "./App.css";
+import "./styles/users.css"; // Import styles
+import LoginForm from "./components/LoginForm";
+import Registro from "./components/Registro";
+import Header from "./components/Header";
+import UserProfile from "./components/UserProfile";
+import Tarjeta from "./components/tarjeta";
+import Administrador from "./components/Administrador";
+import ProductsGrid from "./components/ProductsGrid";
+import VerifyEmail from "./components/VerifyEmail";
 
-const backendURL = import.meta.env.VITE_BACKEND_URL 
-                   || (window.location.hostname === "localhost" 
-                       ? "http://localhost:3001" 
-                       : "https://proyecto-web-gufr.onrender.com");
+const backendURL =
+  import.meta.env.VITE_BACKEND_URL ||
+  (window.location.hostname === "localhost"
+    ? "http://localhost:3001"
+    : "https://proyecto-web-gufr.onrender.com");
 
+import { CartProvider } from "./context/CartContext";
+
+import Cart from "./components/Cart";
 
 function App() {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]); // State for all users
   const [selectedUser, setSelectedUser] = useState(null); // State for selected user
-  const [view, setView] = useState('dashboard'); // State for admin view
-  const [showRegister, setShowRegister] = useState(false);
+  const [view, setView] = useState("dashboard"); // State for admin view
+  const [_showRegister, setShowRegister] = useState(false);
   const [mostrarTarjeta, setMostrarTarjeta] = useState(false);
   const navigate = useNavigate();
 
@@ -31,13 +35,13 @@ function App() {
     if (loggedInUser) {
       const foundUser = JSON.parse(loggedInUser);
       setUser(foundUser);
-      if (foundUser.role === 'administrador') {
-        navigate('/administrador');
+      if (foundUser.role === "administrador") {
+        navigate("/administrador");
         fetchUsers(); // Fetch users if admin
       }
     } else {
       if (window.location.pathname !== "/register") {
-        navigate('/login');
+        navigate("/login");
       }
     }
   }, [navigate]);
@@ -45,13 +49,14 @@ function App() {
   useEffect(() => {
     let intervalId;
     const fetchUserBalance = async () => {
-      if (user && user.id) { // Use user.id instead of user.email
+      if (user && user.id) {
+        // Use user.id instead of user.email
         try {
           const response = await fetch(`${backendURL}/users/${user.id}`); // Use /users/:id endpoint
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.data) {
-              setUser(prevUser => ({
+              setUser((prevUser) => ({
                 ...prevUser,
                 balance: data.data.saldo,
                 name: `${data.data.nombres} ${data.data.apellidos}`,
@@ -82,21 +87,21 @@ function App() {
         const data = await response.json();
         setUsers(data);
       } else {
-        console.error('Error al obtener los usuarios');
+        console.error("Error al obtener los usuarios");
       }
     } catch (error) {
-      console.error('Error de red:', error);
+      console.error("Error de red:", error);
     }
   };
 
   const handleLogin = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
-    if (userData.role === 'administrador') {
-      navigate('/administrador');
+    if (userData.role === "administrador") {
+      navigate("/administrador");
       fetchUsers();
     } else {
-      navigate('/');
+      navigate("/");
     }
   };
 
@@ -124,23 +129,24 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    setMostrarTarjeta(false);
-    navigate('/login', { replace: true });
+    window.location.reload();
+    navigate("/login");
   };
 
   const handleSwitchToRegister = () => {
     setShowRegister(true);
-    navigate('/register');
+    navigate("/register");
   };
 
   const handleSwitchToLogin = () => {
     setShowRegister(false);
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
-    <>
-      {user && user.role !== 'administrador' && (
+    <CartProvider>
+      <Cart />
+      {user && user.role !== "administrador" && (
         <Header
           user={user}
           onLogout={handleLogout}
@@ -150,7 +156,7 @@ function App() {
       <Routes>
         {user ? (
           <>
-            {user.role === 'administrador' ? (
+            {user.role === "administrador" ? (
               <Route
                 path="/administrador"
                 element={
@@ -170,15 +176,40 @@ function App() {
               <Route path="/" element={<ProductsGrid apiBase={backendURL} />} />
             )}
             <Route path="/profile" element={<UserProfile user={user} />} />
-            <Route path="*" element={<Navigate to={user.role === 'administrador' ? '/administrador' : '/'} />} />
+            <Route
+              path="*"
+              element={
+                <Navigate
+                  to={user.role === "administrador" ? "/administrador" : "/"}
+                />
+              }
+            />
           </>
         ) : (
           <>
-            <Route path="/login" element={<LoginForm onLogin={handleLogin} onGoogleLogin={handleGoogleLogin} onSwitchToRegister={handleSwitchToRegister} />} />
-            <Route path="/register" element={<Registro onRegister={handleLogin} onSwitchToLogin={handleSwitchToLogin} />} />
+            <Route
+              path="/login"
+              element={
+                <LoginForm
+                  onLogin={handleLogin}
+                  onGoogleLogin={handleGoogleLogin}
+                  onSwitchToRegister={handleSwitchToRegister}
+                />
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <Registro
+                  onRegister={handleLogin}
+                  onSwitchToLogin={handleSwitchToLogin}
+                />
+              }
+            />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="*" element={<Navigate to="/login" />} />
-          </>)}
+          </>
+        )}
       </Routes>
 
       <Tarjeta
@@ -186,7 +217,7 @@ function App() {
         open={mostrarTarjeta}
         onClose={() => setMostrarTarjeta(false)}
       />
-    </>
+    </CartProvider>
   );
 }
 

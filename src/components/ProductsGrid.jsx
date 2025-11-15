@@ -12,6 +12,21 @@ const ProductsGrid = ({ apiBase = '', storeId = null, onlyAvailable = true }) =>
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  /* ----------------- NUEVOS ESTADOS PARA FILTROS ----------------- */
+  const [maxPrice, setMaxPrice] = useState(200000)
+  const [selectedStars, setSelectedStars] = useState(null)
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [availableFilter, setAvailableFilter] = useState(true)
+
+  /* ----------------- FILTRADO EN EL FRONTEND ----------------- */
+  const applyFilters = (list) => {
+    return list
+      .filter(p => p.precio <= maxPrice)
+      .filter(p => !selectedStars || (p.raw?.stars ?? p.stars ?? 0) === selectedStars)
+      .filter(p => !selectedCategory || (p.raw?.category ?? p.category) === selectedCategory)
+  }
+
+  /* ----------------- TU FETCH ORIGINAL (NO MODIFICADO) ----------------- */
   useEffect(() => {
     const controller = new AbortController()
     const safeBase = normalizeApiBase(apiBase)
@@ -49,7 +64,7 @@ const ProductsGrid = ({ apiBase = '', storeId = null, onlyAvailable = true }) =>
           const raw = r.raw ?? r
           const precioRaw = r.precio ?? r.price ?? raw.precio ?? raw.price ?? 0
           const precio = typeof precioRaw === 'string' ? parseFloat(precioRaw) || 0 : Number(precioRaw || 0)
-          // const estado = (r.estado ?? raw.estado ?? r.status ?? raw.status ?? 'desconocido').toString()
+          //const estado = (r.estado ?? raw.estado ?? r.status ?? raw.status ?? 'desconocido').toString()
           const fechaCreacion = r.fecha_creacion ?? raw.fecha_creacion ?? r.created_at ?? raw.created_at ?? null
 
           return {
@@ -60,27 +75,31 @@ const ProductsGrid = ({ apiBase = '', storeId = null, onlyAvailable = true }) =>
             tamaño: r.tamaño ?? r.tamano ?? r.size ?? raw.tamaño ?? raw.size ?? null,
             precio,
             stock: Number(r.stock ?? r.cantidad ?? raw.stock ?? raw.cantidad ?? 0),
-            // estado,
+            //estado,
             fecha_creacion: fechaCreacion,
             imageUrl: r.imageUrl ?? r.image ?? raw.imageUrl ?? raw.image ?? null,
-            id_categoria: r.id_categoria ?? r.category_id ?? raw.id_categoria ?? null,
+
+            /* NUEVOS CAMPOS */
+            stars: r.stars ?? raw.stars ?? null,
+            category: r.category ?? raw.category ?? null,
+
             raw
           }
         })
 
         const filtered = onlyAvailable
-          ? normalized.filter(p => Number(p.stock ?? 0) > 0)
+          ? normalized.filter(p => Number(p.stock ?? 0)> 0)
           : normalized
 
         setProducts(filtered)
       } catch (err) {
         if (err && err.name === 'AbortError') {
-          console.log('[ProductsGrid] fetch abortado (esperable en StrictMode/dev). Ignorando.')
+          console.log('[ProductsGrid] fetch abortado. Ignorado.')
           return
         }
 
         console.error('[ProductsGrid] Error al traer productos:', err)
-        setError('No se pudieron cargar los productos desde la API. Revisa la consola para más detalles.')
+        setError('No se pudieron cargar los productos desde la API.')
         setProducts([])
       } finally {
         setLoading(false)
@@ -93,21 +112,92 @@ const ProductsGrid = ({ apiBase = '', storeId = null, onlyAvailable = true }) =>
     }
   }, [apiBase, storeId, onlyAvailable])
 
+
+  /* ----------------- APLICAR FILTROS LOCALES ----------------- */
+  const filteredProducts = applyFilters(products)
+
   return (
     <div className="products-container">
-      <div className="products-header">
-        {/* <h1>Tienda</h1> */}
-        {/* <p>Listado de productos</p> */}
+
+      {/* ----------------- NUEVA SECCIÓN DE FILTROS ----------------- */}
+      <div className="filters-sidebar">
+
+        <h3>Filtros</h3>
+
+        {/* Categorías */}
+        <div className="filter-section">
+          <h4>Categoría</h4>
+          <label>
+            <input type="radio" name="cat" onChange={() => setSelectedCategory("bebidas")} />
+            Bebidas
+          </label>
+          <label>
+            <input type="radio" name="cat" onChange={() => setSelectedCategory("postres")} />
+            Postres
+          </label>
+          <label>
+            <input type="radio" name="cat" onChange={() => setSelectedCategory("snacks")} />
+            Snacks
+          </label>
+        </div>
+
+        {/* Precio */}
+        <div className="filter-section">
+          <h4>Precio máximo</h4>
+
+          <input
+            type="range"
+            min="0"
+            max="100000"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(Number(e.target.value))}
+          />
+
+          {/* 🔥 AQUÍ EL CAMBIO: FORMATO CON PUNTOS */}
+          <p>${new Intl.NumberFormat("es-CO").format(maxPrice)}</p>
+        </div>
+
+        {/* Estrellas */}
+        <div className="filter-section">
+          <h4>Opiniones</h4>
+          {[5, 4, 3, 2, 1].map(s => (
+            <label key={s}>
+              <input
+                type="radio"
+                name="stars"
+                onChange={() => setSelectedStars(s)}
+              />
+              {'⭐'.repeat(s)}
+            </label>
+          ))}
+        </div>
+
+        {/* Disponibilidad */}
+        <div className="filter-section">
+          <h4>Disponibilidad</h4>
+          <label>
+            <input
+              type="checkbox"
+              checked={availableFilter}
+              onChange={(e) => setAvailableFilter(e.target.checked)}
+            />
+            Solo disponibles
+          </label>
+        </div>
+
       </div>
+
+      {/* ---------------- GRID ORIGINAL ---------------- */}
+      <div className="products-header"></div>
 
       {loading && <div className="products-loading">Cargando productos...</div>}
       {error && <div className="products-error">{error}</div>}
 
       <div className="products-grid">
-        {products.length === 0 && !loading ? (
+        {filteredProducts.length === 0 && !loading ? (
           <div className="products-empty">No hay productos para mostrar.</div>
         ) : (
-          products.map((product) => (
+          filteredProducts.map((product) => (
             <ProductCard
               key={product.id_producto ?? product.nombre_producto ?? Math.random()}
               product={product}

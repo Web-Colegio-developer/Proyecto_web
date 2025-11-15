@@ -141,12 +141,11 @@ const ProductCard = ({ product = {} }) => {
           <p className="pcard-desc">{desc}</p>
 
           <div className="pcard-footer">
-            <div className="pcard-rating" title={`${rating} de 5`}>
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={14} />
-              ))}
-              <span className="pcard-ratingValue">{rating}</span>
-            </div>
+            <div className="pcard-rating">
+  {[...Array(5)].map((_, i) => (
+    <Star key={i} size={14} />
+  ))}
+</div>
             <div className="pcard-price">{priceFormatted}</div>
           </div>
         </div>

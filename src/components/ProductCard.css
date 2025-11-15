@@ -95,7 +95,7 @@
 .pcard-favorite:hover {
   background: #d4a574;
   color: #fff;
-  transform: scale(1.1);
+ 	transform: scale(1.1);
 }
 
 .pcard-view-details {
@@ -189,10 +189,16 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+  padding: 0;
+  background: none;
+  border: none;
 }
 
 .pcard-rating svg {
-  color: #d4a574;
+  color: #d4a574 !important;
+  font-size: 16px;
 }
 
 .pcard-ratingValue {
@@ -205,6 +211,11 @@
   font-size: 1.25rem;
   font-weight: 800;
   color: #2c2416;
+  margin-top: 4px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
 /* Modal Styles */
@@ -225,12 +236,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
@@ -246,14 +253,8 @@
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-close {
@@ -532,4 +533,44 @@
   .modal-actions {
     flex-direction: column;
   }
+}
+
+/* ----------------------------------------------------------- */
+/* ⭐ AGREGADO: estrellas arriba sin fondo + precio limpio      */
+/* ----------------------------------------------------------- */
+
+.pcard-rating {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-top: 2px !important;
+  margin-bottom: 4px !important;
+}
+
+.pcard-rating svg {
+  color: #d4a574 !important;
+}
+
+.pcard-ratingValue {
+  font-weight: 600 !important;
+  color: #2c2416 !important;
+}
+
+.pcard-price {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* ----------------------------------------------------------- */
+/* ⭐ SEPARAR ESTRELLAS Y PRECIO — SIN ROMPER TU DISEÑO        */
+/* ----------------------------------------------------------- */
+
+.pcard-footer {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
 }

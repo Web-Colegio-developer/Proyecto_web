@@ -14,26 +14,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer"; 
 
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "perfiles",    
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
-  },
-});
 
-const upload = multer({ storage: storage });
-
-
-// Configuración de almacenamiento
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, path.join(process.cwd(), "uploads")); // 👈 más fácil
-//   },
-//   filename: function (req, file, cb) {
-//     cb(null, Date.now() + "-" + file.originalname);
-//   },
-// });
 
 console.log("Dependencias importadas.");
 
@@ -52,8 +33,24 @@ app.get('/', (req, res) => {
   res.send('¡El servidor backend está funcionando!');
 });
 
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: (req) => {
+    let folder = "otros";
+    if (req.query.tipo === "perfil") folder = "perfiles";
+    else if (req.query.tipo === "proyecto") folder = "proyectos";
+    return {
+      folder: folder,
+      allowed_formats: ["jpg", "png", "jpeg", "webp"],
+    };
+  },
+});
+
+const upload = multer({ storage });
+
 app.post("/upload-image", upload.single("foto"), async (req, res) => {
   try {
+    console.log("recibiendo carpeta", req.query.tipo);
     const imageUrl = req.file.path; 
     
     res.json({

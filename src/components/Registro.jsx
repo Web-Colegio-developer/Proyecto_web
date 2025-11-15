@@ -91,9 +91,10 @@ const REGISTRO = ({ onRegister }) => {
     formData.append("password", password);
     formData.append("rol", "estudiante"); // por default
     formDataimg.append("foto", document.getElementById("foto").files[0]);
+    const tipo = "perfil";
 
     try {
-      const res = await fetch("http://localhost:3001/upload-image", {
+      const res = await fetch(`http://localhost:3001/upload-image?tipo=${tipo}`, {
         method: "POST",
         body: formDataimg,
       });

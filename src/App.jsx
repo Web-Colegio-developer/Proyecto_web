@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { googleLogout } from '@react-oauth/google';
 import "./App.css";
 import "./styles/users.css"; // Import styles
 import LoginForm from "./components/LoginForm";
@@ -129,6 +130,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    googleLogout();
     localStorage.removeItem("user");
     setUser(null);
     window.location.reload();

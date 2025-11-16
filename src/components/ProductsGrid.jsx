@@ -39,7 +39,7 @@ const ProductsGrid = ({ apiBase = '', storeId = null, onlyAvailable = true }) =>
         setLoading(true)
         setError(null)
 
-        console.log('[ProductsGrid] Petición a:', fetchUrl)
+        // console.log('[ProductsGrid] Petición a:', fetchUrl)
         const res = await fetch(fetchUrl, { signal: controller.signal })
 
         console.log('[ProductsGrid] status:', res.status, 'ok:', res.ok)
@@ -94,7 +94,7 @@ const ProductsGrid = ({ apiBase = '', storeId = null, onlyAvailable = true }) =>
         setProducts(filtered)
       } catch (err) {
         if (err && err.name === 'AbortError') {
-          console.log('[ProductsGrid] fetch abortado. Ignorado.')
+          // console.log('[ProductsGrid] fetch abortado. Ignorado.')
           return
         }
 

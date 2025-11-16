@@ -689,6 +689,92 @@ app.post("/stores/:storeId/products", upload.none(), async (req, res) => {
   }
 });
 
+// APARTADO DEL SALDO USUARIO
+app.get('/user/:id/balance', async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const [rows] = await pool.query(
+      'SELECT saldo FROM monedas WHERE usuario_id = ?',
+      [userId]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.json({ balance: rows[0].saldo });
+  } catch (error) {
+    console.error('Error al obtener el balance del usuario:', error);
+    res.status(500).json({ message: 'Error en la conexión al servidor' });
+  }
+});
 
+app.put('/user/:id/saldo/recargar', async (req, res) => {
+  const idUsuario = req.params.id;
+  const { monto } = req.body; // monto a recargar
 
+  if (typeof monto !== 'number' || monto <= 0) {
+    return res.status(400).json({ mensaje: 'Debe enviar un monto válido mayor a 0' });
+  }
 
+  try {
+    const [filas] = await pool.query(
+      'SELECT saldo FROM monedas WHERE usuario_id = ?',
+      [idUsuario]
+    );
+
+    if (filas.length === 0) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    const saldoActualizado = parseFloat(filas[0].saldo) + monto;
+
+    await pool.query(
+      'UPDATE monedas SET saldo = ? WHERE usuario_id = ?',
+      [saldoActualizado, idUsuario]
+    );
+
+    res.json({ saldo: saldoActualizado });
+  } catch (error) {
+    console.error('Error al recargar el saldo del usuario:', error);
+    res.status(500).json({ mensaje: 'Error en la conexión al servidor' });
+  }
+});
+
+app.put('/user/:id/saldo/retirar', async (req, res) => {
+  const idUsuario = req.params.id;
+  const { monto } = req.body; // monto a retirar
+
+  if (typeof monto !== 'number' || monto <= 0) {
+    return res.status(400).json({ mensaje: 'Debe enviar un monto válido mayor a 0' });
+  }
+
+  try {
+    const [filas] = await pool.query(
+      'SELECT saldo FROM monedas WHERE usuario_id = ?',
+      [idUsuario]
+    );
+
+    if (filas.length === 0) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    const saldoActual = parseFloat(filas[0].saldo);
+
+    if (monto > saldoActual) {
+      return res.status(400).json({ mensaje: 'Saldo insuficiente' });
+    }
+
+    const saldoActualizado = saldoActual - monto;
+
+    await pool.query(
+      'UPDATE monedas SET saldo = ? WHERE usuario_id = ?',
+      [saldoActualizado, idUsuario]
+    );
+
+    res.json({ saldo: saldoActualizado });
+  } catch (error) {
+    console.error('Error al retirar saldo del usuario:', error);
+    res.status(500).json({ mensaje: 'Error en la conexión al servidor' });
+  }
+});
+
+// FIN  DEL SALDO USUARIO

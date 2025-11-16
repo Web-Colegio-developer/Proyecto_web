@@ -11,6 +11,7 @@ import Tarjeta from "./components/tarjeta";
 import Administrador from "./components/Administrador";
 import ProductsGrid from "./components/ProductsGrid";
 import VerifyEmail from "./components/VerifyEmail";
+import {BalanceProvider } from "./context/BalanceContext";
 
 const backendURL =
   import.meta.env.VITE_BACKEND_URL ||
@@ -148,6 +149,7 @@ function App() {
   };
 
   return (
+    <BalanceProvider user={user} API_URL={backendURL}>
     <CartProvider>
       <Cart />
       {user && user.role !== "administrador" && (
@@ -222,6 +224,7 @@ function App() {
         onClose={() => setMostrarTarjeta(false)}
       />
     </CartProvider>
+    </BalanceProvider>
   );
 }
 

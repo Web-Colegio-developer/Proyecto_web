@@ -1,110 +1,71 @@
-import { useState, useEffect, useRef } from "react"
-import { ShoppingCart, Menu, X } from "lucide-react"
-import { Link } from "react-router-dom"
-import { useCart } from "../context/CartContext"
-import "./Header.css"
+import { useState, useEffect, useRef } from "react";
+import { ShoppingCart, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { useBalance } from "../context/BalanceContext";
+import "./Header.css";
 
-
-
-const getAvatarUrl = (avatarUrl) => {
-  // Si no hay URL, usa la imagen por defecto
-  if (!avatarUrl || avatarUrl === "foto") {
-    return "/chip.png";
-  }
-
-  // Si ya es una URL completa (externa)
-  if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {
-    return avatarUrl;
-  }
-
-  // Si es una ruta local del backend
-  if (avatarUrl.includes("backend\\uploads") || avatarUrl.includes("backend/uploads")) {
-    const normalizedPath = avatarUrl.replace(/\\/g, "/");
-    const cleanPath = normalizedPath.replace("backend/", "");
-    const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001" ||"https://proyecto-web-gufr.onrender.com";
-    return `${backendURL}/${cleanPath}`;
-  }
-
-  // Caso por defecto
-  return avatarUrl.startsWith("/") ? avatarUrl : "/chip.png";
-};
-
-
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://proyecto-web-gufr.onrender.com"
+    : "http://localhost:3001";
 
 export const Header = ({ user, onLogout, onBalanceClick }) => {
-  const [isMenuVisible, setIsMenuVisible] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const menuRef = useRef(null)
-  const { toggleCart } = useCart()
+  const { balance } = useBalance();
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const { toggleCart } = useCart();
 
-  // console.log('BORRAR LOGOUT:', onLogout);
-  const toggleMenu = () => {
-    setIsMenuVisible(!isMenuVisible)
-  }
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+  const toggleMenu = () => setIsMenuVisible(!isMenuVisible);
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsMenuVisible(false)
+        setIsMenuVisible(false);
       }
-    }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
-
-  const avatarSrc = getAvatarUrl(user.avatarUrl)
+  const avatarSrc = user.avatarUrl;
 
   return (
     <header className="main-header">
       <div className="header-container">
-        {/* Logo como imagen */}
         <div className="logo">
-          <div>
-            <img src="/logo.webp" alt="Logo" className="logo-img" />
-          </div>
+          <img src="/logo.webp" alt="Logo" className="logo-img" />
         </div>
-
-        {/* Navegación centrada */}
         <nav className="header-nav">
           <ul>
             <li>
               <Link to="/">Inicio</Link>
-              {/* <a href="#">Inicio</a> */}
             </li>
             <li>
               <Link to="/about">Sobre nosotros</Link>
-              {/* <a href="/about">Sobre nosotros</a> */}
             </li>
             <li>
               <Link to="/contact">Contacto</Link>
-              {/* <a href="/contact">Contacto</a> */}
             </li>
           </ul>
         </nav>
-
-        {/* Bloque derecho dinámico (Escritorio) */}
         <div className="user-section desktop">
-          {/* Saldo */}
           <button className="balance-button" onClick={onBalanceClick}>
             <div className="user-balance">
-              <span>{user.balance.toLocaleString("es-CO")}</span>
-              <span className="currency-symbol">$</span>
+              <span>
+                {balance.toLocaleString("es-CO", {
+                  style: "currency",
+                  currency: "COP",
+                  minimumFractionDigits: 0,
+                })}
+              </span>
             </div>
           </button>
-
-          {/* Carrito */}
           <button className="cart-button" onClick={toggleCart}>
             <ShoppingCart size={26} />
           </button>
-
-          {/* Avatar */}
           <div className="avatar-container" ref={menuRef}>
             <button className="avatar-button" onClick={toggleMenu}>
               <img
@@ -131,66 +92,60 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
             )}
           </div>
         </div>
-
-        {/* Botón de menú móvil */}
         <div className="mobile-menu-button">
           <button onClick={toggleMobileMenu} className="mobile-menu-toggle">
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
       </div>
-
-      {/* Navegación móvil */}
       {isMobileMenuOpen && (
         <nav className="mobile-nav">
           <ul>
             <li>
-              <a href="#">Inicio</a>
+              <Link to="/">Inicio</Link>
             </li>
             <li>
               <Link to="/about">Sobre nosotros</Link>
-              {/* <a href="/about">Sobre nosotros</a> */}
             </li>
             <li>
               <Link to="/contact">Contacto</Link>
-              {/* <a href="/contact">Contacto</a> */}
             </li>
           </ul>
-          {/* Bloque derecho dinámico (Móvil) */}
           <div className="user-section mobile">
-            {/* Perfil */}
-            <Link to="/profile" className="avatar-container" style={{ textDecoration: "none" }}>
+            <Link
+              to="/profile"
+              className="avatar-container"
+              style={{ textDecoration: "none" }}
+            >
               <button className="avatar-button-mobile">
                 <img
                   src={avatarSrc || "/placeholder.svg"}
                   alt={user.name}
                   className="user-avatar"
-                  crossOrigin="anonymous"
                 />
                 <span>{user.name}</span>
               </button>
             </Link>
-
             {user.role === "administrador" && (
               <Link to="/admin" className="avatar-container">
                 <span>Administrador</span>
               </Link>
             )}
-
-            {/* Saldo */}
             <button className="balance-button" onClick={onBalanceClick}>
               <div className="user-balance">
-                <span>Saldo</span>
-                <span>{user.balance.toLocaleString("es-CO")}$</span>
+                <span>
+                  {balance.toLocaleString("es-CO", {
+                    style: "currency",
+                    currency: "COP",
+                    minimumFractionDigits: 0,
+                  })}
+                </span>
               </div>
             </button>
-
-            {/* Carrito */}
             <button className="cart-button" onClick={toggleCart}>
               <ShoppingCart size={20} />
               <span>Carrito</span>
             </button>
-
             <button onClick={onLogout} className="logout-button">
               Cerrar Sesión
             </button>
@@ -198,7 +153,7 @@ export const Header = ({ user, onLogout, onBalanceClick }) => {
         </nav>
       )}
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

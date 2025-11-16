@@ -13,9 +13,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer"; 
 
-
-
-
 console.log("Dependencias importadas.");
 
 const app = express();
@@ -28,6 +25,15 @@ console.log("Cliente de Google creado.");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  res.setHeader("Referrer-Policy", "no-referrer-when-downgrade");
+  next();
+});
+// 🔥 Desactivar COOP/COEP que rompen Google OAuth
 
 app.get('/', (req, res) => {
   res.send('¡El servidor backend está funcionando!');
@@ -167,12 +173,11 @@ app.post('/auth/google', async (req, res) => {
       // User exists, log them in
       const user = rows[0];
       // Optionally, update user's name and photo from Google
-      await pool.query('UPDATE usuarios SET nombres = ?, apellidos = ?, foto = ?, google_id = ? WHERE id = ?', [nombres, apellidos.join(' '), foto, google_id, user.id]);
       const userData = {
         id: user.id,
-        name: `${nombres} ${apellidos.join(' ')}`,
+        name: `${user.nombres} ${user.apellidos}`,
         email: user.correo_electronico,
-        avatarUrl: foto,
+        avatarUrl: user.foto,
         balance: user.saldo || 0,
         role: user.rol,
       };
@@ -184,10 +189,6 @@ app.post('/auth/google', async (req, res) => {
         [nombres, apellidos.join(' '), email, foto, 'estudiante', google_id]
       );
       const newUserId = result.insertId;
-
-      // Create an entry in the monedas table
-      await pool.query('INSERT INTO monedas (usuario_id, saldo) VALUES (?, ?)', [newUserId, 0]);
-
       const userData = {
         id: newUserId,
         name: `${nombres} ${apellidos.join(' ')}`,
@@ -226,8 +227,7 @@ app.put('/users/:id', async (req, res) => {
   const { id } = req.params;
   const { balance, saldo, ...userData } = req.body;
   const balanceToUpdate = balance || saldo;
-
-
+  delete userData.creado_en;
   try {
     // Evitar que se actualice el correo electrónico si no se proporciona
     if (userData.correo_electronico === '' || userData.correo_electronico === undefined) {
@@ -496,9 +496,7 @@ app.get('/stores/:storeId/products', async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM producto WHERE id_tienda = ?', [storeId]);
 
     const normalized = rows.map(r => {
-      const imagenRaw = r.imagen ?? r.foto ?? r.imagen_url ?? r.image ?? r.url_imagen ?? r.img ?? null;
-      const filename = (typeof imagenRaw === 'string' && imagenRaw.length) ? path.basename(imagenRaw) : null;
-      const imageUrl = filename ? `${req.protocol}://${req.get('host')}/uploads/${filename}` : null;
+      const imageUrl = r.foto ?? null;
 
       return {
         id_producto: r.id_producto ?? r.id ?? r.productId ?? null,
@@ -532,9 +530,7 @@ app.get('/products', async (req, res) => {
     }
 
     const normalized = rows.map(r => {
-      const imagenRaw = r.imagen ?? r.foto ?? r.imagen_url ?? r.image ?? r.url_imagen ?? r.img ?? null;
-      const filename = (typeof imagenRaw === 'string' && imagenRaw.length) ? path.basename(imagenRaw) : null;
-      const imageUrl = filename ? `${req.protocol}://${req.get('host')}/uploads/${filename}` : null;
+      const imageUrl = r.foto ?? null;
 
       return {
         id_producto: r.id_producto ?? null,

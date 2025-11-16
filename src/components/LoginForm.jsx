@@ -113,7 +113,6 @@ function LoginForm({ onLogin, onGoogleLogin, onSwitchToRegister }) {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
-              useOneTap
             />
           </div>
 

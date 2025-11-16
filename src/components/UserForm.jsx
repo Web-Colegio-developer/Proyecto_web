@@ -127,7 +127,7 @@ const UserForm = ({ user, onSave, onCancel, onDelete, isVisible }) => {
               </div>
               <div className="form-group">
                 <label>Monedas</label>
-                <input type="number" name="balance" value={formData.balance || 0} onChange={handleChange} />
+                <input type="number" name="saldo" value={formData.saldo || 0} onChange={handleChange} />
               </div>
             </div>
 

@@ -64,11 +64,12 @@ const ProductCard = ({ product = {} }) => {
   const [isFavorite, setIsFavorite] = useState(false)
   const [showModal, setShowModal] = useState(false)
 
+
   const title = product.nombre_producto ?? product.name ?? 'Producto'
   const desc = product.descripcion ?? product.description ?? ''
   const precioNum = Number(product.precio ?? product.price ?? 0)
   const priceFormatted = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(precioNum)
-  const imageUrl = product.imagen_producto ?? product.ImagenProducto ?? ImagenProducto
+  const imageUrl = product.imageUrl ??  ImagenProducto
   const rating = product.rating ?? 4.5
   const category = product.categoria ?? product.categoria_producto ?? 'General'
   const badge = product.badge ?? product.oferta ?? ''

@@ -46,39 +46,41 @@ function App() {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    let intervalId;
-    const fetchUserBalance = async () => {
-      if (user && user.id) {
-        // Use user.id instead of user.email
-        try {
-          const response = await fetch(`${backendURL}/users/${user.id}`); // Use /users/:id endpoint
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.data) {
-              setUser((prevUser) => ({
-                ...prevUser,
-                balance: data.data.saldo,
-                name: `${data.data.nombres} ${data.data.apellidos}`,
-                avatarUrl: data.data.foto,
-              }));
-            }
-          } else {
-            console.error("Error al obtener perfil:", response.statusText);
+ useEffect(() => {
+  let intervalId;
+
+  const fetchUserBalance = async () => {
+    if (user && user.id) {
+      try {
+        const response = await fetch(`${backendURL}/users/${user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            setUser((prevUser) => ({
+              ...prevUser,
+              balance: data.data.saldo,
+              name: `${data.data.nombres} ${data.data.apellidos}`,
+              avatarUrl: data.data.foto,
+            }));
           }
-        } catch (error) {
-          console.error("Error al conectar al servidor:", error);
+        } else {
+          console.error("Error al obtener perfil:", response.statusText);
         }
+      } catch (error) {
+        console.error("Error al conectar al servidor:", error);
       }
-    };
-    if (user) {
-      fetchUserBalance();
-      intervalId = setInterval(fetchUserBalance, 15000);
     }
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [user]);
+  };
+
+  // ejecutar al inicio
+  fetchUserBalance();
+
+  // ejecutar cada 15 segundos
+  intervalId = setInterval(fetchUserBalance, 15000);
+
+  return () => clearInterval(intervalId);
+}, []); // 👈 YA NO DEPENDE DE user
+
 
   const fetchUsers = async () => {
     try {

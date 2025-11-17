@@ -777,4 +777,87 @@ app.put('/user/:id/saldo/retirar', async (req, res) => {
   }
 });
 
+app.get('/user/:correo', async (req, res) => {
+  const { correo } = req.params;
+  try {
+    const [rows] = await pool.query(
+      'SELECT u.*, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ?',
+      [correo]
+    );
+    if (rows.length > 0) {
+      res.json({ success: true, data: rows[0] });
+    } else {
+      res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al obtener el perfil:', error);
+    res.status(500).json({ message: 'Error en la conexión al servidor' });
+  }
+});
+
+app.put('/user/:id/saldo/transferir', async (req, res) => {
+  const idUsuarioOrigen = req.params.id; // ID del usuario que hace la transferencia
+  const { monto, destinatariocorreo } = req.body;
+
+  if (typeof monto !== 'number' || monto <= 0) {
+    return res.status(400).json({ mensaje: 'Debe enviar un monto válido mayor a 0' });
+  }
+
+  try {
+    // Primero, obtener el usuario origen usando el ID del usuario
+    const [filasOrigen] = await pool.query(
+      'SELECT saldo FROM monedas WHERE usuario_id = ?',
+      [idUsuarioOrigen]
+    );
+    if (filasOrigen.length === 0) {
+      return res.status(404).json({ mensaje: 'Usuario origen no encontrado' });
+    }
+
+    const saldoOrigen = parseFloat(filasOrigen[0].saldo);
+
+    // Verificar si el saldo es suficiente
+    if (monto > saldoOrigen) {
+      return res.status(400).json({ mensaje: 'Saldo insuficiente para realizar la transferencia' });
+    }
+
+    // Obtener el ID del destinatario usando su correo electrónico
+    const [filasDestino] = await pool.query(
+      'SELECT u.id, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ?',
+      [destinatariocorreo]
+    );
+    if (filasDestino.length === 0) {
+      return res.status(404).json({ mensaje: 'Usuario destinatario no encontrado' });
+    }
+
+    const idUsuarioDestino = filasDestino[0].id; // ID del destinatario
+    const saldoDestino = parseFloat(filasDestino[0].saldo);
+
+    // Actualizar los saldos
+    const saldoOrigenActualizado = saldoOrigen - monto;
+    const saldoDestinoActualizado = saldoDestino + monto;
+
+    // Actualizar saldo del usuario origen
+    await pool.query(
+      'UPDATE monedas SET saldo = ? WHERE usuario_id = ?',
+      [saldoOrigenActualizado, idUsuarioOrigen]
+    );
+
+    // Actualizar saldo del usuario destino
+    await pool.query(
+      'UPDATE monedas SET saldo = ? WHERE usuario_id = ?',
+      [saldoDestinoActualizado, idUsuarioDestino]
+    );
+
+    res.json({
+      mensaje: 'Transferencia realizada correctamente',
+      saldoOrigen: saldoOrigenActualizado,
+      saldoDestino: saldoDestinoActualizado,
+    });
+  } catch (error) {
+    console.error('Error en la transferencia de saldo:', error);
+    res.status(500).json({ mensaje: 'Error en la conexión al servidor' });
+  }
+});
+
+
 // FIN  DEL SALDO USUARIO

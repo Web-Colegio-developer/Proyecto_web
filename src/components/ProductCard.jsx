@@ -59,11 +59,10 @@ const Star = ({ size = 16 }) => (
   </svg>
 )
 
-const ProductCard = ({ product = {} }) => {
+const ProductCard = ({ product = {}, isFiltered = false }) => {
   const { addToCart } = useCart()
   const [isFavorite, setIsFavorite] = useState(false)
   const [showModal, setShowModal] = useState(false)
-
 
   const title = product.nombre_producto ?? product.name ?? 'Producto'
   const desc = product.descripcion ?? product.description ?? ''
@@ -71,7 +70,7 @@ const ProductCard = ({ product = {} }) => {
   const priceFormatted = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(precioNum)
   const imageUrl = product.imageUrl ??  ImagenProducto
   const rating = product.rating ?? 4.5
-  const category = product.categoria ?? product.categoria_producto ?? 'General'
+  const category = product.categoria ?? product.categoria_producto ?? 'HOLA'
   const badge = product.badge ?? product.oferta ?? ''
   const stock = Number(product.stock ?? 0)
   const tamaño = product.tamaño ?? product.tamano ?? product.size ?? 'Estándar'
@@ -97,17 +96,21 @@ const ProductCard = ({ product = {} }) => {
     setShowModal(false)
   }
 
+  const cardClassName = isFiltered ? 'pcard-filtered' : 'pcard'
+  const imageWrapClassName = isFiltered ? 'pcard-filtered-imageWrap' : 'pcard-imageWrap'
+  const bodyClassName = isFiltered ? 'pcard-filtered-body' : 'pcard-body'
+
   return (
     <>
-      <article className="pcard">
-        <div className="pcard-imageWrap">
-          <img className="pcard-image" src={imageUrl || '/placeholder.svg'} alt={title} />
+      <article className={cardClassName}>
+        <div className={imageWrapClassName}>
+          <img className={isFiltered ? 'pcard-filtered-image' : 'pcard-image'} src={imageUrl || '/placeholder.svg'} alt={title} />
 
-          {badge && <span className="pcard-badge">{badge}</span>}
+          {badge && <span className={isFiltered ? 'pcard-filtered-badge' : 'pcard-badge'}>{badge}</span>}
 
-          <div className="pcard-actions">
+          <div className={isFiltered ? 'pcard-filtered-actions' : 'pcard-actions'}>
             <button 
-              className="pcard-action-btn pcard-favorite" 
+              className={isFiltered ? 'pcard-filtered-action-btn pcard-filtered-favorite' : 'pcard-action-btn pcard-favorite'}
               aria-label="Agregar a favoritos"
               onClick={toggleFavorite}
               title="Agregar a favoritos"
@@ -115,7 +118,7 @@ const ProductCard = ({ product = {} }) => {
               <IconHeart size={20} filled={isFavorite} />
             </button>
             <button 
-              className="pcard-action-btn pcard-view-details" 
+              className={isFiltered ? 'pcard-filtered-action-btn pcard-filtered-view-details' : 'pcard-action-btn pcard-view-details'}
               aria-label="Ver detalles"
               onClick={handleViewDetails}
               title="Ver detalles"
@@ -123,7 +126,7 @@ const ProductCard = ({ product = {} }) => {
               <IconEye size={20} />
             </button>
             <button 
-              className="pcard-action-btn pcard-add-to-cart" 
+              className={isFiltered ? 'pcard-filtered-action-btn pcard-filtered-add-to-cart' : 'pcard-action-btn pcard-add-to-cart'}
               aria-label="Agregar al carrito"
               onClick={handleAddToCart}
               title="Agregar al carrito"
@@ -134,20 +137,20 @@ const ProductCard = ({ product = {} }) => {
           </div>
         </div>
 
-        <div className="pcard-body">
-          <div className="pcard-meta">{category}</div>
+        <div className={bodyClassName}>
+          <div className={isFiltered ? 'pcard-filtered-meta' : 'pcard-meta'}>{category}</div>
 
-          <h3 className="pcard-title">{title}</h3>
+          <h3 className={isFiltered ? 'pcard-filtered-title' : 'pcard-title'}>{title}</h3>
 
-          <p className="pcard-desc">{desc}</p>
+          <p className={isFiltered ? 'pcard-filtered-desc' : 'pcard-desc'}>{desc}</p>
 
-          <div className="pcard-footer">
-            <div className="pcard-rating">
-  {[...Array(5)].map((_, i) => (
-    <Star key={i} size={14} />
-  ))}
-</div>
-            <div className="pcard-price">{priceFormatted}</div>
+          <div className={isFiltered ? 'pcard-filtered-footer' : 'pcard-footer'}>
+            <div className={isFiltered ? 'pcard-filtered-rating' : 'pcard-rating'}>
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={14} />
+              ))}
+            </div>
+            <div className={isFiltered ? 'pcard-filtered-price' : 'pcard-price'}>{priceFormatted}</div>
           </div>
         </div>
       </article>

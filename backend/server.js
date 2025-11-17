@@ -494,7 +494,7 @@ app.get("/stores/:storeId", async (req, res) => {
 app.get('/stores/:storeId/products', async (req, res) => {
   const { storeId } = req.params;
   try {
-    const [rows] = await pool.query('SELECT * FROM producto WHERE id_tienda = ?', [storeId]);
+    const [rows] = await pool.query('SELECT p.*, c.nombre_categoria AS categoria FROM producto p INNER JOIN categoria c ON p.id_categoria = c.id_categoria WHERE p.id_tienda = ?', [storeId]);
 
     const normalized = rows.map(r => {
       const imageUrl = r.foto ?? null;
@@ -508,7 +508,8 @@ app.get('/stores/:storeId/products', async (req, res) => {
         precio: r.precio ?? r.price ?? 0,
         stock: r.stock ?? r.cantidad ?? 0,
         raw: r,
-        imageUrl
+        imageUrl,
+        category: r.categoria ?? null
       };
     });
 
@@ -525,9 +526,9 @@ app.get('/products', async (req, res) => {
   try {
     let rows;
     if (storeId) {
-      [rows] = await pool.query('SELECT * FROM producto WHERE id_tienda = ?', [storeId]);
+      [rows] = await pool.query('SELECT p.*, c.nombre_categoria AS categoria FROM producto p INNER JOIN categoria c ON p.id_categoria = c.id_categoria WHERE p.id_tienda = ?', [storeId]);
     } else {
-      [rows] = await pool.query('SELECT * FROM producto LIMIT 500');
+      [rows] = await pool.query('SELECT p.*, c.nombre_categoria AS categoria FROM producto p INNER JOIN categoria c ON p.id_categoria = c.id_categoria LIMIT 500');
     }
 
     const normalized = rows.map(r => {
@@ -542,7 +543,8 @@ app.get('/products', async (req, res) => {
         precio: r.precio ?? 0,
         stock: r.stock ?? 0,
         raw: r,
-        imageUrl
+        imageUrl,
+        category: r.categoria ?? null
       };
     });
 

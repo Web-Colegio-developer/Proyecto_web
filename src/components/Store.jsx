@@ -10,6 +10,7 @@ import {
   UilArrowLeft,
   UilExclamationTriangle,
 } from "@iconscout/react-unicons"
+import { ChartNoAxesColumnIcon } from "lucide-react";
 
 const getImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
@@ -18,37 +19,33 @@ const getImageUrl = (imageUrl) => {
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
     return imageUrl;
   }
-
-  // Si es una ruta local del backend
-  if (imageUrl.includes("backend\\uploads") || imageUrl.includes("backend/uploads")) {
-    // Determinar backend URL según entorno
-    const backendURL = import.meta.env.VITE_BACKEND_URL 
-                        || (window.location.hostname === "localhost" 
-                            ? "http://localhost:3001" 
-                            : "https://proyecto-web-gufr.onrender.com");
-
-    // Normalizar la ruta
-    const cleanPath = imageUrl.replace(/\\/g, "/").replace("backend/", "");
-    return `${backendURL}/${cleanPath}`;
-  }
-
   return null;
-};
+};  
+
+const backendURL = import.meta.env.VITE_BACKEND_URL
+  || (window.location.hostname === "localhost"
+    ? "http://localhost:3001"
+    : "https://proyecto-web-gufr.onrender.com");
 
 
 const Store = ({ selectedStore, user, onBack }) => {
-
-  const backendURL = import.meta.env.VITE_BACKEND_URL 
-                      || (window.location.hostname === "localhost" 
-                          ? "http://localhost:3001" 
-                          : "https://proyecto-web-gufr.onrender.com");
 
 
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-
+  const [preview, setPreview] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ show: false, product: null })
+
+
+  const handleImageChange = async (e) => {
+    if (e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setPreview(URL.createObjectURL(file));
+    } else {
+      setPreview(null);
+    }
+  };
 
   const [editingProduct, setEditingProduct] = useState(null)
   const [editValues, setEditValues] = useState({
@@ -66,6 +63,8 @@ const Store = ({ selectedStore, user, onBack }) => {
     tamaño: "",
     precio: "",
     stock: "",
+    categoria: "",
+    imageUrl: "",
   })
   const [addLoading, setAddLoading] = useState(false)
 
@@ -121,6 +120,7 @@ const Store = ({ selectedStore, user, onBack }) => {
     }
   }
 
+
   const handleEditOpen = (product) => {
     setEditingProduct(product)
     setEditValues({
@@ -170,7 +170,11 @@ const Store = ({ selectedStore, user, onBack }) => {
     setAddForm((prev) => ({ ...prev, [name]: value }))
   }
 
+
+//funcion de crear producto
   const handleAddSubmit = async (e) => {
+    
+
     e.preventDefault()
 
     if (!addForm.nombre_producto || addForm.nombre_producto.trim() === "") {
@@ -179,8 +183,28 @@ const Store = ({ selectedStore, user, onBack }) => {
     if (addForm.precio === "" || isNaN(Number(addForm.precio))) {
       return alert("Precio inválido.")
     }
-
     setAddLoading(true)
+
+    // Subir imagen si hay una seleccionada
+    const formDataimg = new FormData();
+    formDataimg.append("foto", document.getElementById("add-image").files[0]);
+    const tipo = "proyecto";
+    try {
+      const res = await fetch(`${backendURL}/upload-image?tipo=${tipo}`, {
+        method: "POST",
+        body: formDataimg,
+      });
+      const data = await res.json();
+      if (data.success) {
+        formDataimg.append("url", data.url);
+      } else {
+        console.error("Error al subir la imagen:", data.error);
+      }
+    } catch (err) {
+      console.error("Error al conectar con el backend:", err);
+    }
+
+    // Crear el producto
     try {
       const payload = {
         nombre_producto: addForm.nombre_producto.trim(),
@@ -188,13 +212,19 @@ const Store = ({ selectedStore, user, onBack }) => {
         tamaño: addForm.tamaño?.trim() || "",
         precio: Number(addForm.precio),
         stock: Number(addForm.stock || 0),
+        categoria: addForm.categoria?.trim() || "",
+        imageUrl: formDataimg.get("url") || "",
       }
 
+      console.log("Payload para crear producto:", payload)
+
+      
       const res = await fetch(`${backendURL}/stores/${selectedStore.id_tienda}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
+      
 
       const ct = res.headers.get("content-type") || ""
       if (!ct.includes("application/json")) {
@@ -212,7 +242,7 @@ const Store = ({ selectedStore, user, onBack }) => {
         alert(json.message || json.error || "Error al crear producto")
       } else {
         setShowAddModal(false)
-        setAddForm({ nombre_producto: "", descripcion: "", tamaño: "", precio: "", stock: "" })
+        setAddForm({ nombre_producto: "", descripcion: "", tamaño: "", precio: "", stock: "", categoria: "", imageUrl: "" })
         await fetchProducts(selectedStore.id_tienda)
       }
     } catch (err) {
@@ -323,9 +353,8 @@ const Store = ({ selectedStore, user, onBack }) => {
                     <div className="product-bottom">
                       <span className="product-price-modern">${Number(product.precio).toLocaleString()}</span>
                       <span
-                        className={`stock-indicator ${
-                          product.stock > 10 ? "stock-high" : product.stock > 0 ? "stock-medium" : "stock-low"
-                        }`}
+                        className={`stock-indicator ${product.stock > 10 ? "stock-high" : product.stock > 0 ? "stock-medium" : "stock-low"
+                          }`}
                       >
                         {product.stock > 10 ? "✓ Disponible" : product.stock > 0 ? "⚠ Poco stock" : "✕ Agotado"}
                       </span>
@@ -501,6 +530,30 @@ const Store = ({ selectedStore, user, onBack }) => {
               </div>
 
               <div className="input-group">
+                <select
+                  className="input-select"
+                  name="categoria"
+                  value={addForm.categoria}
+                  onChange={handleAddChange}
+                >
+                  <option value="">Seleccione una categoría</option>
+
+                  <option value="1">Bebidas</option>
+                  <option value="2">Lácteos</option>
+                  <option value="3">Vegetales</option>
+                  <option value="4">frutas</option>
+                  <option value="5">dulces</option>
+                  <option value="6">Postres</option>
+                  <option value="7">Comida típica</option>
+                  <option value="8">Comida rápida</option>
+                  <option value="9">Comida Mar</option>
+                  <option value="10">Frutos Secos</option>
+                </select>
+
+              </div>
+
+
+              <div className="input-group">
                 <label className="input-label">Tamaño</label>
                 <input
                   className="input-field"
@@ -510,6 +563,39 @@ const Store = ({ selectedStore, user, onBack }) => {
                   placeholder="Ej: 250ml, Grande, XL"
                 />
               </div>
+
+
+              <div className="input-group">
+                <label className="input-label">Imagen del producto</label>
+
+                {/* Vista previa */}
+                {preview ? (
+                  <div className="image-preview-container">
+                    <img src={preview} className="image-preview" />
+                  </div>
+                ) : (
+                  <div className="image-preview-placeholder">
+                    <UilImage size="40" />
+                    <p>Sin imagen</p>
+                  </div>
+                )}
+
+                {/* Input visual */}
+                <div className="upload-input-wrapper">
+                  <label htmlFor="add-image" className="upload-btn">
+                    <UilImage size="20" /> Seleccionar imagen
+                  </label>
+
+                  <input
+                    id="add-image"
+                    type="file"
+                    accept="image/*"
+                    className="upload-input"
+                    onChange={handleImageChange}
+                  />
+                </div>
+              </div>
+
 
               <div className="modal-footer">
                 <button type="submit" disabled={addLoading} className="btn-primary">

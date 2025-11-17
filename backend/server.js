@@ -58,7 +58,8 @@ app.post("/upload-image", upload.single("foto"), async (req, res) => {
   try {
     console.log("recibiendo carpeta", req.query.tipo);
     const imageUrl = req.file.path; 
-    
+    console.log("Imagen subida a Cloudinary:", imageUrl);
+
     res.json({
       success: true,
       url: imageUrl,
@@ -650,6 +651,9 @@ app.post("/stores/:storeId/products", upload.none(), async (req, res) => {
   const precio = (precioRaw === null || precioRaw === undefined || precioRaw === "") ? null : Number(precioRaw);
   const stockRaw = body.stock ?? body.cantidad ?? body.qty ?? 0;
   const stock = Number(stockRaw || 0);
+  const categoria = body.categoria ?? body.category ?? null;
+  const imagenUrl = body.imagenUrl ?? body.imageUrl ?? null;
+
 
   // Validaciones
   if (!storeId) {
@@ -665,9 +669,9 @@ app.post("/stores/:storeId/products", upload.none(), async (req, res) => {
 
   try {
     const [result] = await pool.query(
-      `INSERT INTO producto (id_tienda, nombre_producto, descripcion, tamaño, precio, stock)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [storeId, nombre_producto, descripcion, tamaño, precio, stock]
+      `INSERT INTO producto (id_tienda, nombre_producto, descripcion, tamaño, precio, stock , foto, id_categoria)
+       VALUES (?, ?, ?, ?, ?, ? , ? , ?)`,
+      [storeId, nombre_producto, descripcion, tamaño, precio, stock , imagenUrl, categoria]
     );
 
     console.log("Producto insertado id:", result.insertId);
@@ -680,7 +684,9 @@ app.post("/stores/:storeId/products", upload.none(), async (req, res) => {
         descripcion,
         tamaño,
         precio,
-        stock: Number(stock || 0)
+        stock: Number(stock || 0),
+        foto: imagenUrl,
+        id_categoria: categoria
       }
     });
   } catch (err) {

@@ -12,6 +12,9 @@ import Administrador from "./components/Administrador";
 import ProductsGrid from "./components/ProductsGrid";
 import VerifyEmail from "./components/VerifyEmail";
 import {BalanceProvider } from "./context/BalanceContext";
+import Olvidarpassword from "./components/Olvidarpassword";
+import ResetPassword from "./components/ResetPassword";
+
 
 const backendURL =
   import.meta.env.VITE_BACKEND_URL ||
@@ -22,6 +25,7 @@ const backendURL =
 import { CartProvider } from "./context/CartContext";
 
 import Cart from "./components/Cart";
+import { Router } from "lucide-react";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -31,6 +35,7 @@ function App() {
   const [_showRegister, setShowRegister] = useState(false);
   const [mostrarTarjeta, setMostrarTarjeta] = useState(false);
   const navigate = useNavigate();
+  const publicRoutes = ["/login", "/register", "/olvidar-password","/reset-password" , "/verify-email"];//rutas públicas
 
   useEffect(() => {
     const loggedInUser = localStorage.getItem("user");
@@ -42,7 +47,7 @@ function App() {
         fetchUsers(); // Fetch users if admin
       }
     } else {
-      if (window.location.pathname !== "/register") {
+      if (!publicRoutes.includes(window.location.pathname)) {
         navigate("/login");
       }
     }
@@ -180,6 +185,7 @@ function App() {
               />
             ) : (
               <Route path="/" element={<ProductsGrid apiBase={backendURL} />} />
+              
             )}
             <Route path="/profile" element={<UserProfile user={user} />} />
             <Route
@@ -212,6 +218,8 @@ function App() {
                 />
               }
             />
+            <Route path="/olvidar-password" element={<Olvidarpassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </>
@@ -224,6 +232,8 @@ function App() {
         onClose={() => setMostrarTarjeta(false)}
       />
     </CartProvider>
+
+
     </BalanceProvider>
   );
 }

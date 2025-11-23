@@ -102,7 +102,9 @@ function LoginForm({ onLogin, onGoogleLogin, onSwitchToRegister }) {
             <label>
               <input type="checkbox" /> Acepta Términos y Condiciones
             </label>
-            <a href="#">¿Olvidó su Contraseña?</a>
+              <Link to="/olvidar-password" className="text-blue-600 hover:underline">
+              ¿Olvidó su Contraseña?
+            </Link>
           </div>
 
           <button type="submit" className="btn">

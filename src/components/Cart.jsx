@@ -1,10 +1,12 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { X } from 'lucide-react';
+import {useNavigate } from "react-router-dom";
 import './Cart.css';
 
 const Cart = () => {
   const { cartItems, removeFromCart, isCartOpen, toggleCart } = useCart();
+  const Navigate = useNavigate();
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -44,7 +46,7 @@ const Cart = () => {
               <span>Total:</span>
               <span>${total.toLocaleString('es-CO')}</span>
             </div>
-            <button className="checkout-btn">Finalizar Compra</button>
+            <button className="checkout-btn" onClick={() => Navigate("/InterfazComprar")}>Finalizar Compra</button>
           </div>
         )}
       </div>

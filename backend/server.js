@@ -12,6 +12,7 @@ import fs from 'fs';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer"; 
+import cron from "node-cron";
 
 console.log("Dependencias importadas.");
 
@@ -26,6 +27,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+
+
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
   res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
@@ -38,6 +42,26 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   res.send('¡El servidor backend está funcionando!');
 });
+
+// Tarea programada para eliminar usuarios no verificados cada 10 minutos
+
+cron.schedule("*/10 * * * *", async () => {
+  try {
+    console.log("⏳ Ejecutando limpieza de usuarios no verificados...");
+
+    // Eliminar usuarios NO VERIFICADOS que NO tengan google_id
+    const [result] = await pool.query(
+      "DELETE FROM usuarios WHERE verified = 0 AND google_id IS NULL"
+    );
+
+    console.log(`🗑 Usuarios eliminados: ${result.affectedRows}`);
+  } catch (error) {
+    console.error("❌ Error limpiando usuarios:", error);
+  }
+});
+
+
+
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -107,7 +131,7 @@ app.post('/login', async (req, res) => {
   try {
     //Buscar usuario por correo
     const [rows] = await pool.query(
-      'SELECT u.id, u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, u.passwords, m.saldo FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ?',
+      'SELECT u.id, u.nombres, u.apellidos, u.correo_electronico, u.foto, u.rol, u.passwords, u.verified , m.saldo  FROM usuarios u JOIN monedas m ON u.id = m.usuario_id WHERE u.correo_electronico = ?',
       [user]
     );
 
@@ -116,6 +140,10 @@ app.post('/login', async (req, res) => {
     }
 
     const userDB = rows[0];
+
+    if (userDB.verified === 0) {
+      return res.status(403).json({ message: 'Por favor verifique su correo electrónico antes de iniciar sesión' });
+    }
 
     //Verificar contraseña cifrada
     const isPasswordValid = await bcrypt.compare(pass, userDB.passwords);
@@ -869,3 +897,134 @@ app.put('/user/:id/saldo/transferir', async (req, res) => {
 
 
 // FIN  DEL SALDO USUARIO
+
+
+
+//Endpoints transacciones
+
+app.post('/webhooks/wompi', (req, res) => {
+  console.log("Evento recibido desde Wompi:", req.body);
+
+  // Siempre responde 200 OK para confirmar que lo recibiste
+  res.status(200).send("ok");
+})
+
+
+
+
+//Endpoints cambiar contraseñas y recuperar contraseñas
+
+//esta se encargar de enviar el correo con el link para restablecer la contraseña 
+app.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) return res.status(400).json({
+      success: false,
+      message: "Debes enviar un correo"
+    });
+
+    const [rows] = await pool.query(
+      "SELECT id, nombres FROM usuarios WHERE correo_electronico = ?",
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No existe un usuario con ese correo"
+      });
+    }
+
+    // Crear token temporal de 15 min
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: "15m"
+    });
+
+    const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+    // Enviar correo
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Soporte" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Restablecer contraseña",
+      html: `
+        <p>Hola ${rows[0].nombres},</p>
+        <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+        <a href="${link}" style="
+            padding: 10px 20px;
+            background:#0d6efd;
+            color: white;
+            border-radius: 5px;
+            text-decoration:none;
+        ">Restablecer contraseña</a>
+
+        <p>O copia este enlace:</p>
+        <p>${link}</p>
+      `,
+    });
+
+    res.json({
+      success: true,
+      message: "Correo de recuperación enviado"
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en el servidor"
+    });
+  }
+});
+
+
+//Este se encargar al actualizar la contraseña
+app.post("/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: "Datos incompletos" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const email = decoded.email;
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const [result] = await pool.query(
+      "UPDATE usuarios SET passwords = ? WHERE correo_electronico = ?",
+      [hashed, email]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No se pudo actualizar la contraseña"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Contraseña actualizada correctamente"
+    });
+
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ success: false, message: "El token expiró" });
+    }
+
+    res.status(500).json({ success: false, message: "Error en servidor" });
+  }
+});

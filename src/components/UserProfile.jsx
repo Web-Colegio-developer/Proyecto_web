@@ -121,17 +121,17 @@ export default function PerfilUsuario({ user }) {
 
   return (
     <div className="user-profile-container">
-      <div className="w-full max-w-5xl mx-auto">
+      <div className="w-full max-w-[1500px] mx-auto">
         <div className="profile-header text-center">
           <h2 className="text-2xl font-bold">Perfil</h2>
           <p className="text-gray-500">Aquí tienes todos tus datos de perfil</p>
         </div>
         <div className="profile-content">
           {/* Columna Izquierda (Perfil) */}
-          <div className="flex-grow flex-shrink-0 md:w-2/5 user-profile-card">
+          <div className="flex-grow flex-shrink-0 md:w-3/5 user-profile-card">
             <div className="profile-avatar-section">
               <h3 className="profile-name">{editedData.nombres} {editedData.apellidos}</h3>
-              <p className="profile-role">{editedData.rol}</p>
+              <p className="profile-role badge-role">{editedData.rol}</p>
               <div className="avatar-image-wrapper">
                 <img
                   src={editedData.foto || '/logo.webp'}
@@ -185,10 +185,10 @@ export default function PerfilUsuario({ user }) {
               </div>
             </div>
             <div className="profile-actions">
-              <button onClick={handleSaveChanges} className="bg-orange-700 text-white px-6 py-2 rounded-lg shadow-md hover:bg-orange-800">
+              <button onClick={handleSaveChanges} className="save-btn">
                 Guardar Cambios
               </button>
-              <button onClick={handleDiscardChanges} className="border border-orange-700 text-orange-700 px-6 py-2 rounded-lg shadow-md hover:bg-orange-100">
+              <button onClick={handleDiscardChanges} className="">
                 Descartar Cambios
               </button>
             </div>

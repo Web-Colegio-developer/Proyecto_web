@@ -31,9 +31,11 @@ const VerifyEmail = () => {
       .then(data => {
         if (data.success) {
           toast.success("Correo verificado correctamente. Ahora puedes iniciar sesión.");
+          console.log(data , "correo verificado");
           navigate("/login");
         } else {
           toast.error(data.message);
+          console.log(data , "error verificacion");
         }
       })
       .catch(err => toast.error("Error en la conexión: " + err.message));

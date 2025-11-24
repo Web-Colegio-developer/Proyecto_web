@@ -44,23 +44,22 @@ app.get('/', (req, res) => {
 });
 
 // Tarea programada para eliminar usuarios no verificados cada 10 minutos
-
-cron.schedule("*/10 * * * *", async () => {
+cron.schedule("*/2 * * * *", async () => {
   try {
     console.log("⏳ Ejecutando limpieza de usuarios no verificados...");
 
-    // Eliminar usuarios NO VERIFICADOS que NO tengan google_id
-    const [result] = await pool.query(
-      "DELETE FROM usuarios WHERE verified = 0 AND google_id IS NULL"
-    );
+    const [result] = await pool.query(`
+      DELETE FROM usuarios
+      WHERE verified = 0 
+      AND google_id IS NULL
+    `);
 
     console.log(`🗑 Usuarios eliminados: ${result.affectedRows}`);
+
   } catch (error) {
     console.error("❌ Error limpiando usuarios:", error);
   }
 });
-
-
 
 
 const storage = new CloudinaryStorage({

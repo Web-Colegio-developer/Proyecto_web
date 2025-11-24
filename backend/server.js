@@ -368,14 +368,14 @@ app.post("/register", upload.single("foto"), async (req, res) => {
     if (!nombre?.trim() || !apellido?.trim() || !email?.trim() || !telefono?.trim() || !direccion?.trim() || !fechaNacimiento?.trim() || !ciudad?.trim() || !gender?.trim() || !password?.trim()) {
       return res.status(400).json({ success: false, message: "Faltan campos obligatorios" });
     }
-
+    console.log("Primer paso de validación superado.");
     // Procesar foto
     const foto = req.body.foto
     const rolUsuario = rol?.trim() || "estudiante";
 
     // Cifrar contraseña
     const hashedPassword = await bcrypt.hash(password.trim(), 10);
-
+    console.log("Contraseña cifrada.");
     // Insertar usuario en DB con verified = 0
     await pool.query(
       `INSERT INTO usuarios 
@@ -396,10 +396,10 @@ app.post("/register", upload.single("foto"), async (req, res) => {
         0 // verified = 0
       ]
     );
-
+    console.log("Usuario insertado en la base de datos.");
     // Generar token JWT para verificación
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
-
+    console.log("Token JWT generado.");
     // Configurar transporter de nodemailer
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com", // O tu proveedor SMTP
@@ -410,10 +410,10 @@ app.post("/register", upload.single("foto"), async (req, res) => {
         pass: process.env.EMAIL_PASS,
       },
     });
-
+    console.log("Transporter de nodemailer configurado.");
     // Link de verificación
     const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
-
+    console.log("Link de verificación creado:", verificationLink);
     // Enviar email
     await transporter.sendMail({
       from: `"Tu App" <${process.env.EMAIL_USER}>`,

@@ -19,7 +19,7 @@ const Tarjeta = ({ user, open, onClose }) => {
 
   const API_URL =
     process.env.NODE_ENV === "production"
-      ? "https://proyecto-web-gufr.onrender.com"
+      ? "https://proyecto-web-6xzt.onrender.com"
       : "http://localhost:3001";
 
   const abrirModal = (tipo) => {

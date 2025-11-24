@@ -6,7 +6,7 @@ const getBackendURL = () => {
   const envURL = import.meta.env.VITE_BACKEND_URL;
   if (envURL) return envURL;
   if (window.location.hostname === "localhost") return "http://localhost:3001";
-  return "https://proyecto-web-gufr.onrender.com";
+  return "https://proyecto-web-6xzt.onrender.com";
 };
 
 const VerifyEmail = () => {

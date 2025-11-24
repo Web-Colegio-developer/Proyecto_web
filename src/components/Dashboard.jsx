@@ -25,7 +25,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null)
 
   const backendUrl = window.location.hostname.includes("netlify.app")
-  ? "https://proyecto-web-gufr.onrender.com"
+  ? "https://proyecto-web-6xzt.onrender.com"
   : "http://localhost:3001"
 
   useEffect(() => {

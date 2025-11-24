@@ -25,7 +25,7 @@ const getImageUrl = (imageUrl) => {
 const backendURL = import.meta.env.VITE_BACKEND_URL
   || (window.location.hostname === "localhost"
     ? "http://localhost:3001"
-    : "https://proyecto-web-gufr.onrender.com");
+    : "https://proyecto-web-6xzt.onrender.com");
 
 
 const Store = ({ selectedStore, user, onBack }) => {

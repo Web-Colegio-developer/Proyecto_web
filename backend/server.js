@@ -936,44 +936,33 @@ app.post("/forgot-password", async (req, res) => {
       expiresIn: "15m"
     });
 
-    const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const verificationLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const nombre = rows[0].nombres;
 
     // Enviar correo
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      logger: true,
-      debug: true,
-    });
+    const msg = {
+    to: email,
+    from: process.env.EMAIL_USER, // debe ser tu remitente verificado en SendGrid
+    subject: "Verifica tu correo electrónico",
+    html: `
+      <p>Hola ${nombre},</p>
+      <p>Gracias por login. Por favor  cambia de contraseña:</p>
+      <a href="${verificationLink}" style="
+          display: inline-block;
+          padding: 10px 20px;
+          background-color: #4CAF50;
+          color: white;
+          text-decoration: none;
+          border-radius: 5px;
+          font-weight: bold;
+      ">Verificar Correo</a>
+      <p>Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
+      <p>${verificationLink}</p>
+    `,
+  };
 
-    await transporter.sendMail({
-      from: `"Soporte" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Restablecer contraseña",
-      html: `
-        <p>Hola ${rows[0].nombres},</p>
-        <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-        <a href="${link}" style="
-            padding: 10px 20px;
-            background:#0d6efd;
-            color: white;
-            border-radius: 5px;
-            text-decoration:none;
-        ">Restablecer contraseña</a>
-
-        <p>O copia este enlace:</p>
-        <p>${link}</p>
-      `,
-    },(err, info) => {  
-      if (err) console.error("Error al enviar correo:", err);
-      else console.log("Correo enviado:", info.response);
-    });
-
+    await sgMail.send(msg);
+    console.log("Email enviado vía SendGrid API");
     res.json({
       success: true,
       message: "Correo de recuperación enviado"

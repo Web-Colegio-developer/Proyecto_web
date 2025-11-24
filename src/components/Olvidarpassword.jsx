@@ -6,7 +6,9 @@ export default function Olvidarpassword() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const backendURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+    const backendURL = window.location.hostname.includes("netlify.app")
+    ? "https://proyecto-web-6xzt.onrender.com"
+    : "http://localhost:3001"
 
   const handleSubmit = async (e) => {
     e.preventDefault();

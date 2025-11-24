@@ -951,6 +951,8 @@ app.post("/forgot-password", async (req, res) => {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      logger: true,
+      debug: true,
     });
 
     await transporter.sendMail({
@@ -971,6 +973,9 @@ app.post("/forgot-password", async (req, res) => {
         <p>O copia este enlace:</p>
         <p>${link}</p>
       `,
+    },(err, info) => {  
+      if (err) console.error("Error al enviar correo:", err);
+      else console.log("Correo enviado:", info.response);
     });
 
     res.json({

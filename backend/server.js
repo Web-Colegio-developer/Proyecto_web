@@ -13,6 +13,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer"; 
 import cron from "node-cron";
+import { info } from 'console';
 
 console.log("Dependencias importadas.");
 
@@ -409,6 +410,8 @@ app.post("/register", upload.single("foto"), async (req, res) => {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      logger: true,
+      debug: true,
     });
     console.log("Transporter de nodemailer configurado.");
     // Link de verificación
@@ -434,8 +437,12 @@ app.post("/register", upload.single("foto"), async (req, res) => {
         <p>Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
         <p>${verificationLink}</p>
       `,
+    },(err, info) => {
+      if(err)console.error("Error enviando email:", err);
+      else console.log("Email enviado:", info);
     });
 
+    console.log("Email enviado.");     
     res.json({ success: true, message: "Usuario registrado exitosamente. Revisa tu correo para verificar la cuenta." });
 
   } catch (error) {

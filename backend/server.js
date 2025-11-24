@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
 });
 
 // Tarea programada para eliminar usuarios no verificados cada 10 minutos
-cron.schedule("*/2 * * * *", async () => {
+cron.schedule("*/25 * * * *", async () => {
   try {
     console.log("⏳ Ejecutando limpieza de usuarios no verificados...");
 
@@ -403,12 +403,11 @@ app.post("/register", upload.single("foto"), async (req, res) => {
     console.log("Token JWT generado.");
     // Configurar transporter de nodemailer
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com", // O tu proveedor SMTP
+      host: "smtp.sendgrid.net",
       port: 587,
-      secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: "apikey", // siempre "apikey"
+        pass: process.env.SENDGRID_API_KEY,
       },
       logger: true,
       debug: true,

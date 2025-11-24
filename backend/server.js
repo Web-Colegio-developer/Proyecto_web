@@ -14,6 +14,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer"; 
 import cron from "node-cron";
 import { info } from 'console';
+import sgMail from '@sendgrid/mail';
 
 console.log("Dependencias importadas.");
 
@@ -360,6 +361,8 @@ app.get('/users', async (req, res) => {
 // Asegúrate de tener ya importado arriba en tu archivo
 // const jwt = require("jsonwebtoken");
 // const nodemailer = require("nodemailer");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 
 app.post("/register", upload.single("foto"), async (req, res) => {
   try {
@@ -402,24 +405,12 @@ app.post("/register", upload.single("foto"), async (req, res) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
     console.log("Token JWT generado.");
     // Configurar transporter de nodemailer
-    const transporter = nodemailer.createTransport({
-      host: "smtp.sendgrid.net",
-      port: 587,
-      auth: {
-        user: "apikey", // siempre "apikey"
-        pass: process.env.SENDGRID_API_KEY,
-      },
-      logger: true,
-      debug: true,
-    });
-    console.log("Transporter de nodemailer configurado.");
-    // Link de verificación
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+   const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
     console.log("Link de verificación creado:", verificationLink);
-    // Enviar email
-    await transporter.sendMail({
-      from: `"Tu App" <${process.env.EMAIL_USER}>`,
+    // Enviar correo con SendGrid API
+    const msg = {
       to: email,
+      from: process.env.EMAIL_USER,
       subject: "Verifica tu correo electrónico",
       html: `
         <p>Hola ${nombre},</p>
@@ -436,12 +427,11 @@ app.post("/register", upload.single("foto"), async (req, res) => {
         <p>Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
         <p>${verificationLink}</p>
       `,
-    },(err, info) => {
-      if(err)console.error("Error enviando email:", err);
-      else console.log("Email enviado:", info);
-    });
+    };
+    await sgMail.send(msg);
+    console.log("Email enviado vía SendGrid API");
 
-    console.log("Email enviado.");     
+    res.json({ success: true, message: "Usuario registrado exitosamente. Revisa tu correo para verificar la cuenta." });   
     res.json({ success: true, message: "Usuario registrado exitosamente. Revisa tu correo para verificar la cuenta." });
 
   } catch (error) {

@@ -1,21 +1,63 @@
+/*** perfil de usuario ***/
+
+.perfil-header {
+  text-align: center;
+  margin-top: 5px;
+}
+
+
+.Titulo {
+  font-size: 50px;
+  font-weight: 700;
+  color: #5b3a29; /* Café similar al de tu ejemplo */
+  margin-bottom: 10px;
+  position: relative;
+  display: inline-block;
+}
+
+
+.Titulo::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;   /* Espacio debajo del texto */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;    /* Tamaño de la raya */
+  height: 4px;
+  background-color: #d7b56d; /* Dorado ligero */
+  border-radius: 5px;
+}
+
+.Subtitulo {
+  margin-top: 2px;
+  margin-bottom: 7%;
+  text-align: center;
+  font-size: 20px;
+  color: #7a7a7a;
+}
+
+
+
 /* CONTENEDOR PRINCIPAL */
 .user-profile-container {
   min-height: 100vh;
   background: #f4f6fb;
   display: flex;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 10px 20px;
 }
 
 /* TARJETA PRINCIPAL */
 .profile-content {
+  justify-content: center;
   transform: scale(1.15);
   transform-origin: top center;
   display: flex;
-  gap: 80px;
+  gap: 65px;
   width: 100%;
-  max-width: 1100px;
-  margin-top: 20px;
+  max-width: 1400px;
+  margin : 40px auto 0 auto;
+
 }
 
 /* TARJETA IZQUIERDA */

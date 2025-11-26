@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate , useLocation } from "react-router-dom";
 import { googleLogout } from '@react-oauth/google';
 import "./App.css";
 import "./styles/users.css"; // Import styles
@@ -14,6 +14,7 @@ import VerifyEmail from "./components/VerifyEmail";
 import {BalanceProvider } from "./context/BalanceContext";
 import Olvidarpassword from "./components/Olvidarpassword";
 import ResetPassword from "./components/ResetPassword";
+import Footer from "./components/footer.jsx";
 
 
 const backendURL =
@@ -36,7 +37,8 @@ function App() {
   const [mostrarTarjeta, setMostrarTarjeta] = useState(false);
   const navigate = useNavigate();
   const publicRoutes = ["/login", "/register", "/olvidar-password","/reset-password" , "/verify-email"];//rutas públicas
-
+  const location = useLocation();
+  const hiderFooter = location.pathname === '/administrador'|| location.pathname === '/login' || location.pathname === '/register';
   useEffect(() => {
     const loggedInUser = localStorage.getItem("user");
     if (loggedInUser) {
@@ -163,6 +165,7 @@ function App() {
           onLogout={handleLogout}
           onBalanceClick={() => setMostrarTarjeta(true)}
         />
+        
       )}
       <Routes>
         {user ? (
@@ -231,6 +234,7 @@ function App() {
         open={mostrarTarjeta}
         onClose={() => setMostrarTarjeta(false)}
       />
+      {!hiderFooter && <Footer />}
     </CartProvider>
 
 

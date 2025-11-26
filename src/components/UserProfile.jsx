@@ -122,9 +122,9 @@ export default function PerfilUsuario({ user }) {
   return (
     <div className="user-profile-container">
       <div className="w-full max-w-[1500px] mx-auto">
-        <div className="profile-header text-center">
-          <h2 className="text-2xl font-bold">Perfil</h2>
-          <p className="text-gray-500">Aquí tienes todos tus datos de perfil</p>
+        <div className="perfil-header">
+          <h2 className="Titulo"> Mi Perfil</h2>
+          <p className="Subtitulo">Gestiona tu informacion personal</p>
         </div>
         <div className="profile-content">
           {/* Columna Izquierda (Perfil) */}

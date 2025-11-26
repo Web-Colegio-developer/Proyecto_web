@@ -1,80 +1,120 @@
+# Proyecto Web - E-commerce & Gestión de Usuarios
 
-# Proyecto Web - React + Vite + Express + MySQL
+Plataforma web completa que integra un sistema de comercio electrónico, gestión de usuarios, billetera virtual y panel de administración. Construida con **React (Vite)** en el frontend y **Express (Node.js)** en el backend, utilizando **MySQL** como base de datos.
 
-Este proyecto es una plataforma web que integra un frontend en React (Vite), un backend en Express y una base de datos MySQL. Permite la gestión de usuarios, autenticación, administración y visualización de productos.
+## 🚀 Tecnologías Utilizadas
 
-## Estructura del proyecto
+### Frontend
+*   **Framework:** React 18 + Vite
+*   **Estilos:** CSS Vanilla (Diseño modular por componentes)
+*   **Routing:** React Router DOM v6
+*   **Autenticación:** `@react-oauth/google` (Google Login)
+*   **Iconos:** Lucide React, Unicons
+*   **Notificaciones:** React Toastify
+*   **Estado Global:** React Context API (BalanceContext, CartContext)
 
-- **Frontend:**
-  - React + Vite
-  - Componentes principales: Login, Registro, Perfil de usuario, Tarjeta, Administrador, Grid de productos, Header, Sidebar
-  - Rutas protegidas y navegación dinámica según el rol del usuario
-  - Estilos personalizados en CSS
+### Backend
+*   **Servidor:** Node.js + Express
+*   **Base de Datos:** MySQL (con `mysql2/promise` para consultas asíncronas)
+*   **Autenticación:** JWT (JSON Web Tokens), Google Auth Library
+*   **Seguridad:** Bcryptjs (Hashing de contraseñas)
+*   **Almacenamiento de Imágenes:** Cloudinary + Multer
+*   **Correos:** SendGrid (Verificación de email y recuperación de contraseña)
+*   **Tareas Programadas:** Node-cron (Limpieza de usuarios no verificados)
 
-- **Backend:**
-  - Express.js
-  - Conexión a MySQL usando `mysql2/promise`
-  - Endpoints para login, registro, consulta de usuarios y productos
-  - Gestión de imágenes y archivos con Multer
+## ✨ Funcionalidades Principales
 
-- **Base de datos:**
-  - MySQL
-  - Tablas para usuarios, monedas, productos y transacciones
+### 👤 Usuarios
+*   **Registro y Login:**
+    *   Autenticación tradicional (Email/Contraseña) con encriptación.
+    *   **Login Social:** Inicio de sesión con Google.
+    *   **Verificación de Correo:** Envío de emails con tokens de verificación.
+    *   **Recuperación de Contraseña:** Flujo completo de "Olvidé mi contraseña" vía email.
+*   **Perfil:** Edición de datos personales y foto de perfil.
+*   **Billetera Virtual:**
+    *   Consulta de saldo en tiempo real.
+    *   Recarga y retiro de saldo (simulado).
+    *   Transferencias entre usuarios vía correo electrónico.
 
-## Principales funcionalidades
+### 🛒 E-commerce (Tienda)
+*   **Catálogo:** Visualización de productos en formato Grid.
+*   **Carrito de Compras:** Agregar productos, ver resumen y "comprar" (descuenta del saldo).
+*   **Tiendas:** Visualización de productos por tienda específica.
 
-- Autenticación de usuarios (login y registro)
-- Panel de administración para gestión de usuarios
-- Visualización y búsqueda de usuarios
-- Visualización de productos en formato grid
-- Perfil de usuario editable
-- Tarjeta virtual con saldo y acciones (retirar, recargar, transferir, recompra)
+### 🛡️ Administración (Rol Admin)
+*   **Dashboard:** Panel exclusivo para administradores.
+*   **Gestión de Usuarios:** Tabla con listado de todos los usuarios registrados.
+*   **CRUD:** Capacidad de eliminar o editar usuarios desde el panel.
 
-## Instalación y ejecución
+## 📂 Estructura del Proyecto
 
-1. Instalar dependencias en el frontend:
-	```bash
-	npm install
-	```
-2. Instalar dependencias en el backend:
-	```bash
-	cd backend
-	npm install
-	```
-3. Configurar variables de entorno en `backend/.env` para la conexión a MySQL.
-4. Ejecutar el backend:
-	```bash
-	node server.js
-	```
-5. Ejecutar el frontend:
-	```bash
-	npm run dev
-	```
+```
+Proyecto_web/
+├── backend/                # Servidor Node.js
+│   ├── middlewares/        # Middlewares (Auth, etc.)
+│   ├── db.js               # Conexión a BD y Cloudinary
+│   ├── server.js           # Lógica principal y Endpoints
+│   └── uploads/            # Temporales para subida de archivos
+│
+├── src/                    # Código fuente Frontend
+│   ├── components/         # Componentes React (Login, Dashboard, Cart, etc.)
+│   ├── context/            # Contextos globales (Balance, Cart)
+│   ├── styles/             # Archivos CSS globales
+│   ├── App.jsx             # Configuración de rutas y layout principal
+│   └── main.jsx            # Punto de entrada (Providers)
+│
+└── public/                 # Assets estáticos
+```
 
-## Dependencias principales
+## ⚙️ Instalación y Configuración
 
-- React, React Router DOM, React Toastify
-- Express, mysql2, multer, dotenv
+### 1. Base de Datos
+Asegúrate de tener MySQL corriendo y crea la base de datos con las tablas necesarias (`usuarios`, `monedas`, `producto`, `tienda`, `categoria`).
 
+### 2. Backend
+```bash
+cd backend
+npm install
+```
+Crea un archivo `.env` en la carpeta `backend/` con las siguientes variables:
+```env
+PORT=3001
+DB_HOST=localhost
+DB_USER=tu_usuario
+DB_PASSWORD=tu_contraseña
+DB_NAME=nombre_base_datos
+JWT_SECRET=tu_secreto_jwt
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+GOOGLE_CLIENT_ID=...
+SENDGRID_API_KEY=...
+EMAIL_USER=tu_email_verificado_sendgrid
+FRONTEND_URL=http://localhost:5173
+```
+Ejecuta el servidor:
+```bash
+npm start
+# o
+node server.js
+```
 
-## Entregables & Releases
+### 3. Frontend
+```bash
+# Desde la raíz del proyecto (Proyecto_web)
+npm install
+npm run dev
+```
+La aplicación estará disponible en `http://localhost:5173`.
 
-Se sigue una estrategia de releases semánticos (SemVer). Cada release representa una fase clave del proyecto.
+## 🔄 Endpoints Principales (API)
 
-| Fase | Entregables principales | Tag / Release sugerido |
-|---|---:|---|
-| Fase 1  Análisis y Diseño | Documento de requisitos, prototipos de pantallas, especificación de API (Swagger/Postman). | **v0.1.0**  Release title: "Fase 1  Análisis y Diseño (v0.1.0)" |
-| Fase 2  Backend / Django & MySQL | API funcional (Swagger/Postman), base de datos normalizada, endpoints probados. | **v0.2.0**  "Fase 2 Backend (v0.2.0)" |
-| Fase 3  Frontend / React | Frontend funcional conectado al backend, flujo completo compra-recarga. | **v0.3.0**  "Fase 3  Frontend (v0.3.0)" |
-| Fase 4  Integración y Pruebas | Plataforma probada end-to-end; preparada para pruebas piloto. | **v1.0.0**  "Fase 4  Integración y Pruebas (v1.0.0)" |
-| Fase 5  Despliegue y Mantenimiento | Sistema en producción, documentación técnica y manual de usuario. | **v1.1.0** "Fase 5  Despliegue y Mantenimiento (v1.1.0)" |
+*   `POST /login` - Iniciar sesión
+*   `POST /register` - Registrar usuario
+*   `GET /products` - Obtener productos
+*   `GET /users/:id/balance` - Obtener saldo
+*   `PUT /user/:id/saldo/transferir` - Transferir dinero
+*   `POST /upload-image` - Subir imagen a Cloudinary
 
-
-## Roadmap / Hitos futuros
-
-- **Hito: Analítica y Personalización** — Integración con sistemas de analítica de consumo.
-- **Hito: Programas de Fidelización** — Puntos y recompensas.
-- **Hito: Pagos Sin Contacto** — NFC / QR para recargas.
-- **Hito: Integración con Billeteras Digitales** — Ej: Nequi, Daviplata.
-
-Estos hitos se registran como **Milestones** / Issues etiquetados para seguimiento.
+---
+Desarrollado como parte del proyecto integrador de desarrollo web.

@@ -14,7 +14,7 @@ import VerifyEmail from "./components/VerifyEmail";
 import {BalanceProvider } from "./context/BalanceContext";
 import Olvidarpassword from "./components/Olvidarpassword";
 import ResetPassword from "./components/ResetPassword";
-import Footer from "./components/footer.jsx";
+import Footer from "./components/Footer.jsx";
 
 
 const backendURL =

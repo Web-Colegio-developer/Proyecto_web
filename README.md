@@ -105,7 +105,9 @@ node server.js
 npm install
 npm run dev
 ```
-La aplicación estará disponible en `http://localhost:5173`.
+La aplicación estará disponible en parte de visual `https://gentle-sopapillas-42aa52.netlify.app `.
+La parte de API `https://proyecto-web-6xzt.onrender.com/`.
+
 
 ## 🔄 Endpoints Principales (API)
 

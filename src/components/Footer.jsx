@@ -1,17 +1,16 @@
-import "./Footer.css";
+import "./Footer.css"
 
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer-container">
-        
         {/* LOGO + DESCRIPCIÓN */}
         <div className="footer-section brand">
           <div className="footer-logo">C</div>
           <h2>Clothing.</h2>
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Descubre la excelencia en moda de lujo. Colecciones cuidadosamente seleccionadas para el cliente
+            discerniente que valora la calidad y el estilo.
           </p>
 
           <div className="social-icons">
@@ -51,17 +50,18 @@ export default function Footer() {
         {/* Contact Info */}
         <div className="footer-section">
           <h3>Contact Info</h3>
-          <p>+0123-456-789</p>
-          <p>example@gmail.com</p>
-          <p>
-            8502 Preston Rd.<br />
+          <p style={{ marginBottom: "12px", lineHeight: 1.7, fontSize: "15px" }}>+0123-456-789</p>
+          <p style={{ marginBottom: "12px", fontSize: "15px" }}>example@gmail.com</p>
+          <p style={{ fontSize: "15px", lineHeight: 1.7 }}>
+            8502 Preston Rd.
+            <br />
             Inglewood, Maine 98380
           </p>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <p>© 2024 Clothing Website Design. All Rights Reserved.</p>
+        <p>© 2025 Clothing. All Rights Reserved.</p>
 
         <div className="footer-lang">
           <span>English ▾</span>
@@ -69,5 +69,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }
